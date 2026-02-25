@@ -41,7 +41,7 @@ const EXAM_TYPES = [
   { value: "perfil", label: "Perfil Genético", desc: "Individual", icon: Fingerprint, color: "text-warning" },
 ];
 
-const STEPS = ["Tipo de Exame", "Participantes", "Anamnese", "Documentos", "Confirmação"];
+const STEPS = ["Tipo de Exame", "Participantes", "Ficha Cadastral", "Documentos", "Confirmação"];
 
 const createParticipant = (role: string): Participant => ({
   id: Date.now().toString() + Math.random(),
@@ -106,7 +106,7 @@ const NovoExame = () => {
   const pendencies: string[] = [];
   participants.forEach((p) => {
     if (!p.name) pendencies.push(`Nome de ${p.role}`);
-    if (p.transplant === null) pendencies.push(`Anamnese de ${p.role}`);
+    if (p.transplant === null) pendencies.push(`Ficha de ${p.role}`);
     if (p.documents.length === 0) pendencies.push(`Docs de ${p.role}`);
   });
   if (!consent && step >= 4) pendencies.push("Termo de consentimento");
@@ -234,7 +234,7 @@ const NovoExame = () => {
           </div>
         )}
 
-        {/* Step 2 - Anamnesis */}
+        {/* Step 2 - Ficha Cadastral */}
         {step === 2 && (
           <div className="space-y-4">
             {participants.map((p) => (
