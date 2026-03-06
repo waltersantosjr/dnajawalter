@@ -37,7 +37,7 @@ interface Participant {
 const EXAM_TYPES = [
   { value: "duo", label: "Duo", desc: "Pai + Filho", icon: Users, color: "text-primary" },
   { value: "trio", label: "Trio", desc: "Pai + Mãe + Filho", icon: UserPlus, color: "text-success" },
-  { value: "reconstrucao", label: "Reconstrução", desc: "Parentes Indiretos", icon: Dna, color: "text-chart-4" },
+  { value: "reconstrucao", label: "Reconstituição", desc: "Parentes 1º Grau", icon: Dna, color: "text-chart-4" },
   { value: "perfil", label: "Perfil Genético", desc: "Individual", icon: Fingerprint, color: "text-warning" },
 ];
 
@@ -116,9 +116,9 @@ const NovoExame = () => {
       <div className="flex-1 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Dna className="h-7 w-7 text-primary" /> Novo Exame
+            <Dna className="h-7 w-7 text-primary" /> Reconstituição Genética
           </h1>
-          <p className="text-muted-foreground">Cadastro de exame de identificação humana</p>
+          <p className="text-muted-foreground">Parentes em primeiro grau - Cadastro de exame</p>
         </div>
 
         {/* Progress */}
