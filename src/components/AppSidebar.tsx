@@ -1,6 +1,7 @@
 import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
-  Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog } from
+  Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
+  Calculator, Receipt } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -15,9 +16,11 @@ import { Button } from "@/components/ui/button";
 const NAV_ITEMS = [
 { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "coletor", "triagem"] },
 { title: "DNAjá", url: "/dnaja", icon: Barcode, roles: ["admin", "triagem"] },
-{ title: "Novo Exame", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
+{ title: "Reconstituição", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
 { title: "Exames", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
 { title: "Simulador", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
+{ title: "Valores/Impostos", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
+{ title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
 { title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
 { title: "Auditoria", url: "/auditoria", icon: ClipboardList, roles: ["admin"] },
 { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] }];
@@ -26,9 +29,11 @@ const NAV_ITEMS = [
 const ICON_COLORS: Record<string, string> = {
   Dashboard: "text-primary",
   DNAjá: "text-warning",
-  "Novo Exame": "text-success",
+  "Reconstituição": "text-success",
   Exames: "text-info",
   Simulador: "text-chart-4",
+  "Valores/Impostos": "text-success",
+  Documentos: "text-primary",
   Tendências: "text-chart-3",
   Auditoria: "text-muted-foreground",
   Configurações: "text-muted-foreground"

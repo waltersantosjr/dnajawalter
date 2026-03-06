@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "./pages/Login";
@@ -11,6 +11,8 @@ import DNAja from "./pages/DNAja";
 import NovoExame from "./pages/NovoExame";
 import ListaExames from "./pages/ListaExames";
 import Simulador from "./pages/Simulador";
+import SimuladorPrecos from "./pages/SimuladorPrecos";
+import Documentos from "./pages/Documentos";
 import Tendencias from "./pages/Tendencias";
 import Auditoria from "./pages/Auditoria";
 import Configuracoes from "./pages/Configuracoes";
@@ -33,6 +35,8 @@ const App = () => (
               <Route path="/exames/novo" element={<NovoExame />} />
               <Route path="/exames" element={<ListaExames />} />
               <Route path="/simulador" element={<Simulador />} />
+              <Route path="/simulador-precos" element={<SimuladorPrecos />} />
+              <Route path="/documentos" element={<Documentos />} />
               <Route path="/tendencias" element={<Tendencias />} />
               <Route path="/auditoria" element={<Auditoria />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
