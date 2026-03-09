@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Activity, UserPlus, UserMinus, Users, Baby, Heart,
   AlertTriangle, CheckCircle2, XCircle, Shield, Scale,
-  FileText, Search, Crown, Info, ArrowRight,
+  FileText, Search, Crown, Info, ArrowRight, DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
 
