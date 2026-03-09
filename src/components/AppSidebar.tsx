@@ -55,7 +55,7 @@ export function AppSidebar() {
     <Sidebar className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <img alt="DNAjá" className="h-10 w-auto rounded-lg object-contain" src="/lovable-uploads/562c2990-74db-474e-84b1-2eceaa607f7f.png" />
+          <img alt="DNAjá" className="h-10 w-auto rounded-lg object-contain" src="/lovable-uploads/6ef15ca4-bd7f-4ccc-8cc6-7c55824b7cc1.png" />
           <div>
             <h2 className="text-sm font-bold text-sidebar-foreground">DNAjá</h2>
             <p className="text-xs text-sidebar-foreground/60">Vínculo Genético</p>
