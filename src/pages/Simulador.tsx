@@ -72,6 +72,7 @@ const levelBg = (l: string) => l === "green" ? "bg-success/10" : l === "yellow" 
 const Simulador = () => {
   const [members, setMembers] = useState(INITIAL_MEMBERS);
   const [showTRV, setShowTRV] = useState(false);
+  const [custoExame, setCustoExame] = useState("");
 
   const toggle = (id: string) => {
     setMembers((prev) =>
