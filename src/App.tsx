@@ -16,6 +16,8 @@ import Documentos from "./pages/Documentos";
 import Tendencias from "./pages/Tendencias";
 import Auditoria from "./pages/Auditoria";
 import Configuracoes from "./pages/Configuracoes";
+import CRM from "./pages/CRM";
+import AcompanhamentoExames from "./pages/AcompanhamentoExames";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,8 +36,10 @@ const App = () => (
               <Route path="/dnaja" element={<DNAja />} />
               <Route path="/exames/novo" element={<NovoExame />} />
               <Route path="/exames" element={<ListaExames />} />
+              <Route path="/acompanhamento" element={<AcompanhamentoExames />} />
               <Route path="/simulador" element={<Simulador />} />
               <Route path="/simulador-precos" element={<SimuladorPrecos />} />
+              <Route path="/crm" element={<CRM />} />
               <Route path="/documentos" element={<Documentos />} />
               <Route path="/tendencias" element={<Tendencias />} />
               <Route path="/auditoria" element={<Auditoria />} />
