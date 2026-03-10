@@ -239,35 +239,87 @@ const Simulador = () => {
           <CardTitle className="text-lg flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-success" /> Custo do Exame
           </CardTitle>
-          <CardDescription>Informe o valor estimado para esta configuração</CardDescription>
+          <CardDescription>Informe os valores de custo para esta configuração</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Valor do Exame (R$)</Label>
+              <Label className="text-xs font-semibold">Valor do Exame (venda)</Label>
               <Input
                 type="text"
                 placeholder="0,00"
                 value={custoExame}
                 onChange={(e) => setCustoExame(e.target.value)}
-                className="text-lg font-bold"
+                className="text-lg font-bold font-mono"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Participantes</Label>
+              <Label className="text-xs font-semibold">Valor Terceirizado (lab)</Label>
+              <Input
+                type="text"
+                placeholder="0,00"
+                value={valorTerceirizado}
+                onChange={(e) => setValorTerceirizado(e.target.value)}
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">Custo pago ao laboratório</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Valor do Kit</Label>
+              <Input
+                type="text"
+                placeholder="0,00"
+                value={valorKit}
+                onChange={(e) => setValorKit(e.target.value)}
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">Kit de coleta / material</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Participantes</Label>
               <div className="flex h-10 items-center rounded-md border bg-muted/50 px-3 text-sm">
                 {members.filter(m => m.added).length} pessoa(s)
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Custo por Participante</Label>
-              <div className="flex h-10 items-center rounded-md border bg-muted/50 px-3 text-sm font-semibold text-success">
-                {custoExame && !isNaN(parseFloat(custoExame.replace(",", ".")))
-                  ? `R$ ${(parseFloat(custoExame.replace(",", ".")) / Math.max(members.filter(m => m.added).length, 1)).toFixed(2)}`
-                  : "—"}
+          </div>
+
+          {/* Resumo de custos */}
+          {custoExame && (
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border bg-muted/30 p-3 text-center">
+                <p className="text-xs text-muted-foreground">Custo por Participante</p>
+                <p className="text-lg font-bold font-mono text-primary">
+                  {(() => {
+                    const val = parseFloat(custoExame.replace(",", "."));
+                    const count = Math.max(members.filter(m => m.added).length, 1);
+                    return !isNaN(val) ? `R$ ${(val / count).toFixed(2)}` : "—";
+                  })()}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-warning/5 p-3 text-center">
+                <p className="text-xs text-muted-foreground">Custo Total (lab + kit)</p>
+                <p className="text-lg font-bold font-mono text-warning">
+                  {(() => {
+                    const terc = parseFloat(valorTerceirizado.replace(",", ".")) || 0;
+                    const kit = parseFloat(valorKit.replace(",", ".")) || 0;
+                    return `R$ ${(terc + kit).toFixed(2)}`;
+                  })()}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-success/5 p-3 text-center">
+                <p className="text-xs text-muted-foreground">Margem Bruta</p>
+                <p className="text-lg font-bold font-mono text-success">
+                  {(() => {
+                    const val = parseFloat(custoExame.replace(",", ".")) || 0;
+                    const terc = parseFloat(valorTerceirizado.replace(",", ".")) || 0;
+                    const kit = parseFloat(valorKit.replace(",", ".")) || 0;
+                    const margem = val - terc - kit;
+                    return `R$ ${margem.toFixed(2)}`;
+                  })()}
+                </p>
               </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
