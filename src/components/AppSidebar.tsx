@@ -20,6 +20,7 @@ const NAV_ITEMS = [
 { title: "Reconstituição", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
 { title: "Exames", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
 { title: "Acompanhamento", url: "/acompanhamento", icon: Microscope, roles: ["admin", "coletor", "triagem"] },
+{ title: "Jornada do DNA", url: "/jornada-dna", icon: Route, roles: ["admin", "coletor", "triagem"] },
 { title: "Simulador", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
 { title: "Valores/Impostos", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
 { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
