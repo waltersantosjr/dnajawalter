@@ -36,6 +36,7 @@ const ICON_COLORS: Record<string, string> = {
   "Reconstituição": "text-success",
   Exames: "text-info",
   Acompanhamento: "text-info",
+  "Jornada do DNA": "text-chart-4",
   Simulador: "text-chart-4",
   "Valores/Impostos": "text-success",
   "CRM Comercial": "text-chart-3",
