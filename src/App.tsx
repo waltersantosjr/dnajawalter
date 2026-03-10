@@ -18,6 +18,7 @@ import Auditoria from "./pages/Auditoria";
 import Configuracoes from "./pages/Configuracoes";
 import CRM from "./pages/CRM";
 import AcompanhamentoExames from "./pages/AcompanhamentoExames";
+import JornadaDNA from "./pages/JornadaDNA";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
