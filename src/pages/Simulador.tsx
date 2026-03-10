@@ -73,6 +73,8 @@ const Simulador = () => {
   const [members, setMembers] = useState(INITIAL_MEMBERS);
   const [showTRV, setShowTRV] = useState(false);
   const [custoExame, setCustoExame] = useState("");
+  const [valorTerceirizado, setValorTerceirizado] = useState("");
+  const [valorKit, setValorKit] = useState("");
 
   const toggle = (id: string) => {
     setMembers((prev) =>
