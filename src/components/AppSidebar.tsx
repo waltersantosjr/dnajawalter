@@ -1,7 +1,7 @@
 import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
-  Calculator, Receipt, Briefcase, Microscope } from
+  Calculator, Receipt, Briefcase, Microscope, Route } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -20,6 +20,7 @@ const NAV_ITEMS = [
 { title: "Reconstituição", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
 { title: "Exames", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
 { title: "Acompanhamento", url: "/acompanhamento", icon: Microscope, roles: ["admin", "coletor", "triagem"] },
+{ title: "Jornada do DNA", url: "/jornada-dna", icon: Route, roles: ["admin", "coletor", "triagem"] },
 { title: "Simulador", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
 { title: "Valores/Impostos", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
 { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
@@ -35,6 +36,7 @@ const ICON_COLORS: Record<string, string> = {
   "Reconstituição": "text-success",
   Exames: "text-info",
   Acompanhamento: "text-info",
+  "Jornada do DNA": "text-chart-4",
   Simulador: "text-chart-4",
   "Valores/Impostos": "text-success",
   "CRM Comercial": "text-chart-3",

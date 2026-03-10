@@ -18,6 +18,7 @@ import Auditoria from "./pages/Auditoria";
 import Configuracoes from "./pages/Configuracoes";
 import CRM from "./pages/CRM";
 import AcompanhamentoExames from "./pages/AcompanhamentoExames";
+import JornadaDNA from "./pages/JornadaDNA";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/documentos" element={<Documentos />} />
               <Route path="/tendencias" element={<Tendencias />} />
               <Route path="/auditoria" element={<Auditoria />} />
+              <Route path="/jornada-dna" element={<JornadaDNA />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
             </Route>
             <Route path="*" element={<NotFound />} />
