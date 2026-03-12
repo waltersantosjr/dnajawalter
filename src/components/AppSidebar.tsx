@@ -33,11 +33,11 @@ const NAV_ITEMS = [
 const ICON_COLORS: Record<string, string> = {
   Dashboard: "text-primary",
   DNAjá: "text-warning",
-  "Reconstituição": "text-success",
+  "Novo Exame": "text-success",
   Exames: "text-info",
   Acompanhamento: "text-info",
   "Jornada do DNA": "text-chart-4",
-  Simulador: "text-chart-4",
+  "Reconstituição": "text-chart-4",
   "Valores/Impostos": "text-success",
   "CRM Comercial": "text-chart-3",
   Documentos: "text-primary",
