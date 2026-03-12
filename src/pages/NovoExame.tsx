@@ -8,16 +8,16 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Users, UserPlus, Dna, Fingerprint, ChevronRight, ChevronLeft,
-  CheckCircle2, Circle, AlertTriangle, XCircle, Upload, FileText, Activity,
+  Users, UserPlus, Dna, ChevronRight, ChevronLeft,
+  CheckCircle2, Circle, AlertTriangle, XCircle, Upload, FileText,
+  Scale, User, FilePlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { FichaDNAja } from "@/components/FichaDNAja";
 
-type ExamType = "duo" | "trio" | "reconstrucao" | "perfil" | null;
+type ExamType = "duo" | "trio" | null;
 type Purpose = "judicial" | "particular" | null;
-type ParticipantStatus = "presente" | "falecido" | "ausente";
-type Material = "sangue" | "saliva";
 
 interface Participant {
   id: string;
@@ -27,21 +27,12 @@ interface Participant {
   sex: string;
   docType: string;
   docNumber: string;
-  status: ParticipantStatus;
+  phone: string;
+  email: string;
+  naturalDe: string;
   transplant: boolean | null;
-  transfusion: boolean | null;
-  material: Material;
   documents: string[];
 }
-
-const EXAM_TYPES = [
-  { value: "duo", label: "Duo", desc: "Pai + Filho", icon: Users, color: "text-primary" },
-  { value: "trio", label: "Trio", desc: "Pai + Mãe + Filho", icon: UserPlus, color: "text-success" },
-  { value: "reconstrucao", label: "Reconstituição", desc: "Parentes 1º Grau", icon: Dna, color: "text-chart-4" },
-  { value: "perfil", label: "Perfil Genético", desc: "Individual", icon: Fingerprint, color: "text-warning" },
-];
-
-const STEPS = ["Tipo de Exame", "Participantes", "Ficha Cadastral", "Documentos", "Confirmação"];
 
 const createParticipant = (role: string): Participant => ({
   id: Date.now().toString() + Math.random(),
@@ -51,10 +42,10 @@ const createParticipant = (role: string): Participant => ({
   sex: "",
   docType: "cpf",
   docNumber: "",
-  status: "presente",
+  phone: "",
+  email: "",
+  naturalDe: "",
   transplant: null,
-  transfusion: null,
-  material: "saliva",
   documents: [],
 });
 
@@ -62,11 +53,11 @@ const getDefaultParticipants = (type: ExamType): Participant[] => {
   switch (type) {
     case "duo": return [createParticipant("Suposto Pai"), createParticipant("Filho(a)")];
     case "trio": return [createParticipant("Suposto Pai"), createParticipant("Mãe"), createParticipant("Filho(a)")];
-    case "reconstrucao": return [createParticipant("Filho(a)"), createParticipant("Mãe")];
-    case "perfil": return [createParticipant("Examinado")];
     default: return [];
   }
 };
+
+const STEPS = ["Tipo de Exame", "Participantes", "Ficha Cadastral", "Documentos", "Confirmação"];
 
 const NovoExame = () => {
   const navigate = useNavigate();
@@ -75,6 +66,7 @@ const NovoExame = () => {
   const [purpose, setPurpose] = useState<Purpose>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [consent, setConsent] = useState(false);
+  const [showFicha, setShowFicha] = useState(false);
 
   const selectExamType = (type: ExamType) => {
     setExamType(type);
@@ -84,10 +76,6 @@ const NovoExame = () => {
   const updateParticipant = (id: string, field: keyof Participant, value: any) => {
     setParticipants((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
   };
-
-  const hasBlockingCondition = participants.some(
-    (p) => p.transfusion === true && p.material === "sangue"
-  );
 
   const next = () => {
     if (step === 0 && (!examType || !purpose)) {
@@ -99,8 +87,8 @@ const NovoExame = () => {
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
   const finish = () => {
-    toast.success("Exame cadastrado com sucesso!", { description: `Tipo: ${examType?.toUpperCase()}` });
-    navigate("/exames");
+    toast.success("Exame cadastrado com sucesso!", { description: `Tipo: ${examType?.toUpperCase()} - ${purpose}` });
+    setShowFicha(true);
   };
 
   const pendencies: string[] = [];
@@ -111,14 +99,35 @@ const NovoExame = () => {
   });
   if (!consent && step >= 4) pendencies.push("Termo de consentimento");
 
+  if (showFicha && examType && purpose) {
+    return (
+      <FichaDNAja
+        examType={examType}
+        modality={purpose}
+        participants={participants.map((p) => ({
+          role: p.role,
+          colorClass: p.role.toLowerCase().includes("pai") ? "pai" : p.role.toLowerCase().includes("mãe") ? "mae" : "filho",
+          name: p.name,
+          phone: p.phone,
+          email: p.email,
+          cpf: p.docNumber,
+          birthDate: p.birthDate,
+          naturalDe: p.naturalDe,
+          sex: p.sex,
+        }))}
+        onClose={() => setShowFicha(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex gap-6">
       <div className="flex-1 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Dna className="h-7 w-7 text-primary" /> Reconstituição Genética
+            <FilePlus className="h-7 w-7 text-success" /> Novo Exame
           </h1>
-          <p className="text-muted-foreground">Parentes em primeiro grau - Cadastro de exame</p>
+          <p className="text-muted-foreground">Cadastro de exame de DNA — Duo ou Trio</p>
         </div>
 
         {/* Progress */}
@@ -135,33 +144,55 @@ const NovoExame = () => {
         {step === 0 && (
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
-              {EXAM_TYPES.map((t) => (
-                <Card
-                  key={t.value}
-                  className={`cursor-pointer transition-all hover:shadow-md ${examType === t.value ? "ring-2 ring-primary" : ""}`}
-                  onClick={() => selectExamType(t.value as ExamType)}
-                >
-                  <CardContent className="flex flex-col items-center gap-2 p-6">
-                    <t.icon className={`h-10 w-10 ${t.color}`} />
-                    <p className="text-lg font-bold">{t.label}</p>
-                    <p className="text-sm text-muted-foreground">{t.desc}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${examType === "duo" ? "ring-2 ring-warning" : ""}`}
+                onClick={() => selectExamType("duo")}
+              >
+                <CardContent className="flex flex-col items-center gap-3 p-8">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-warning/10">
+                    <Users className="h-8 w-8 text-warning" />
+                  </div>
+                  <p className="text-xl font-bold">DUO</p>
+                  <p className="text-sm text-muted-foreground text-center">Filho + Suposto Pai</p>
+                  <Badge variant="outline" className="border-warning text-warning">2 participantes</Badge>
+                </CardContent>
+              </Card>
+              <Card
+                className={`cursor-pointer transition-all hover:shadow-md ${examType === "trio" ? "ring-2 ring-[hsl(330,81%,60%)]" : ""}`}
+                onClick={() => selectExamType("trio")}
+              >
+                <CardContent className="flex flex-col items-center gap-3 p-8">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[hsl(330,81%,60%)]/10">
+                    <UserPlus className="h-8 w-8 text-[hsl(330,81%,60%)]" />
+                  </div>
+                  <p className="text-xl font-bold">TRIO</p>
+                  <p className="text-sm text-muted-foreground text-center">Filho + Mãe + Suposto Pai</p>
+                  <Badge variant="outline" className="border-[hsl(330,81%,60%)] text-[hsl(330,81%,60%)]">3 participantes</Badge>
+                </CardContent>
+              </Card>
             </div>
-            <div className="space-y-2">
-              <Label className="font-semibold">Finalidade</Label>
-              <div className="flex gap-4">
-                {(["judicial", "particular"] as const).map((p) => (
-                  <Button
-                    key={p}
-                    variant={purpose === p ? "default" : "outline"}
-                    onClick={() => setPurpose(p)}
-                    className="flex-1 capitalize"
-                  >
-                    {p}
-                  </Button>
-                ))}
+
+            <div className="space-y-3">
+              <Label className="font-semibold text-base">Finalidade do Exame</Label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button
+                  variant={purpose === "particular" ? "default" : "outline"}
+                  onClick={() => setPurpose("particular")}
+                  className={`h-auto flex-col gap-2 py-4 ${purpose === "particular" ? "bg-success hover:bg-success/90" : ""}`}
+                >
+                  <User className="h-6 w-6" />
+                  <span className="text-base font-bold">Particular</span>
+                  <span className="text-xs opacity-80">Iniciativa própria</span>
+                </Button>
+                <Button
+                  variant={purpose === "judicial" ? "default" : "outline"}
+                  onClick={() => setPurpose("judicial")}
+                  className={`h-auto flex-col gap-2 py-4 ${purpose === "judicial" ? "bg-primary hover:bg-primary/90" : ""}`}
+                >
+                  <Scale className="h-6 w-6" />
+                  <span className="text-base font-bold">Judicial</span>
+                  <span className="text-xs opacity-80">Determinação judicial</span>
+                </Button>
               </div>
             </div>
           </div>
@@ -199,38 +230,25 @@ const NovoExame = () => {
                       </Select>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Documento *</Label>
+                      <Label className="text-xs">CPF / RG *</Label>
                       <Input value={p.docNumber} onChange={(e) => updateParticipant(p.id, "docNumber", e.target.value)} placeholder="CPF ou RG" />
                     </div>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Status</Label>
-                    <div className="flex gap-2">
-                      {(["presente", "falecido", "ausente"] as const).map((s) => (
-                        <Button
-                          key={s}
-                          type="button"
-                          size="sm"
-                          variant={p.status === s ? "default" : "outline"}
-                          onClick={() => updateParticipant(p.id, "status", s)}
-                          className="capitalize"
-                        >
-                          {s}
-                        </Button>
-                      ))}
+                    <div className="space-y-1">
+                      <Label className="text-xs">Telefone</Label>
+                      <Input value={p.phone} onChange={(e) => updateParticipant(p.id, "phone", e.target.value)} placeholder="(00) 00000-0000" />
                     </div>
-                    {p.status === "falecido" && p.role.includes("Pai") && (
-                      <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate("/simulador")}>
-                        <Activity className="mr-1 h-4 w-4 text-chart-4" /> Abrir Simulador de Viabilidade
-                      </Button>
-                    )}
+                    <div className="space-y-1">
+                      <Label className="text-xs">E-mail</Label>
+                      <Input value={p.email} onChange={(e) => updateParticipant(p.id, "email", e.target.value)} placeholder="email@exemplo.com" />
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label className="text-xs">Natural de</Label>
+                      <Input value={p.naturalDe} onChange={(e) => updateParticipant(p.id, "naturalDe", e.target.value)} placeholder="Cidade - UF" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
-            <Button variant="outline" onClick={() => setParticipants([...participants, createParticipant("Participante Adicional")])}>
-              <UserPlus className="mr-2 h-4 w-4" /> Adicionar Participante
-            </Button>
           </div>
         )}
 
@@ -255,37 +273,9 @@ const NovoExame = () => {
                       </div>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm">Transfusão de sangue nos últimos 90 dias?</Label>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant={p.transfusion === true ? "destructive" : "outline"} onClick={() => updateParticipant(p.id, "transfusion", true)}>Sim</Button>
-                      <Button size="sm" variant={p.transfusion === false ? "default" : "outline"} onClick={() => updateParticipant(p.id, "transfusion", false)}>Não</Button>
-                    </div>
-                    {p.transfusion && (
-                      <div className="flex items-center gap-2 rounded-md bg-warning/10 p-2 text-sm text-warning">
-                        <AlertTriangle className="h-4 w-4" /> Aguardar 90 dias ou coletar saliva
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm">Material de coleta</Label>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant={p.material === "sangue" ? "default" : "outline"} onClick={() => updateParticipant(p.id, "material", "sangue")}>Sangue</Button>
-                      <Button size="sm" variant={p.material === "saliva" ? "default" : "outline"} onClick={() => updateParticipant(p.id, "material", "saliva")}>Saliva</Button>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             ))}
-            {hasBlockingCondition && (
-              <div className="flex items-center gap-2 rounded-lg border-2 border-destructive bg-destructive/5 p-4">
-                <XCircle className="h-5 w-5 text-destructive" />
-                <div>
-                  <p className="font-semibold text-destructive">BLOQUEIO: Transfusão recente + Sangue</p>
-                  <p className="text-sm text-muted-foreground">Altere para saliva ou aguarde 90 dias.</p>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -338,14 +328,14 @@ const NovoExame = () => {
               <CardContent className="space-y-3">
                 <div className="grid gap-2 text-sm">
                   <p><strong>Tipo:</strong> {examType?.toUpperCase()}</p>
-                  <p><strong>Finalidade:</strong> {purpose}</p>
+                  <p><strong>Finalidade:</strong> {purpose === "judicial" ? "⚖️ Judicial" : "👤 Particular"}</p>
                   <p><strong>Participantes:</strong> {participants.length}</p>
                 </div>
                 {participants.map((p) => (
                   <div key={p.id} className="rounded-md border p-3">
                     <p className="font-medium">{p.role}</p>
                     <p className="text-sm text-muted-foreground">
-                      {p.name || "Sem nome"} · {p.status} · {p.material} · {p.documents.length} docs
+                      {p.name || "Sem nome"} · {p.documents.length} docs
                     </p>
                   </div>
                 ))}
@@ -368,8 +358,8 @@ const NovoExame = () => {
               Próximo <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
           ) : (
-            <Button onClick={finish} disabled={!consent || hasBlockingCondition}>
-              <CheckCircle2 className="mr-1 h-4 w-4" /> Finalizar Cadastro
+            <Button onClick={finish} disabled={!consent}>
+              <FileText className="mr-1 h-4 w-4" /> Finalizar e Gerar Ficha
             </Button>
           )}
         </div>
