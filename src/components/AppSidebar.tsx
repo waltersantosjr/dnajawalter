@@ -17,11 +17,11 @@ import dnajaLogo from "@/assets/dnaja-logo.png";
 const NAV_ITEMS = [
 { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "coletor", "triagem"] },
 { title: "DNAjá", url: "/dnaja", icon: Barcode, roles: ["admin", "triagem"] },
-{ title: "Reconstituição", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
+{ title: "Novo Exame", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
 { title: "Exames", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
 { title: "Acompanhamento", url: "/acompanhamento", icon: Microscope, roles: ["admin", "coletor", "triagem"] },
 { title: "Jornada do DNA", url: "/jornada-dna", icon: Route, roles: ["admin", "coletor", "triagem"] },
-{ title: "Simulador", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
+{ title: "Reconstituição", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
 { title: "Valores/Impostos", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
 { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
 { title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
