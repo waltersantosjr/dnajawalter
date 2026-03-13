@@ -1,7 +1,7 @@
 import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
-  Calculator, Receipt, Briefcase, Microscope, Route } from
+  Calculator, Receipt, Briefcase, Microscope, Route, Users } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -12,45 +12,44 @@ import {
 "@/components/ui/sidebar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import dnajaLogo from "@/assets/dnaja-logo.png";
 
 const NAV_ITEMS = [
-{ title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "coletor", "triagem"] },
-{ title: "DNAjá", url: "/dnaja", icon: Barcode, roles: ["admin", "triagem"] },
-{ title: "Novo Exame", url: "/exames/novo", icon: FilePlus, roles: ["admin", "coletor"] },
-{ title: "Exames", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
-{ title: "Acompanhamento", url: "/acompanhamento", icon: Microscope, roles: ["admin", "coletor", "triagem"] },
-{ title: "Jornada do DNA", url: "/jornada-dna", icon: Route, roles: ["admin", "coletor", "triagem"] },
-{ title: "Reconstituição", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
-{ title: "Valores/Impostos", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
-{ title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
-{ title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
-{ title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
-{ title: "Auditoria", url: "/auditoria", icon: ClipboardList, roles: ["admin"] },
-{ title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] }];
-
+  { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "coletor", "triagem"] },
+  { title: "DNAjá", url: "/dnaja", icon: Barcode, roles: ["admin", "triagem"] },
+  { title: "Duo ou Trio", url: "/exames/novo", icon: Users, roles: ["admin", "coletor"] },
+  { title: "Reconstituição", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
+  { title: "Exames Cadastrados", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
+  { title: "Acompanhamento", url: "/acompanhamento", icon: Microscope, roles: ["admin", "coletor", "triagem"] },
+  { title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
+  { title: "Jornada do DNA", url: "/jornada-dna", icon: Route, roles: ["admin", "coletor", "triagem"] },
+  { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
+  { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
+  { title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
+  { title: "Auditoria", url: "/auditoria", icon: ClipboardList, roles: ["admin"] },
+  { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] },
+];
 
 const ICON_COLORS: Record<string, string> = {
   Dashboard: "text-primary",
   DNAjá: "text-warning",
-  "Novo Exame": "text-success",
-  Exames: "text-info",
-  Acompanhamento: "text-info",
-  "Jornada do DNA": "text-chart-4",
+  "Duo ou Trio": "text-success",
   "Reconstituição": "text-chart-4",
-  "Valores/Impostos": "text-success",
-  "CRM Comercial": "text-chart-3",
+  "Exames Cadastrados": "text-info",
+  Acompanhamento: "text-info",
   Documentos: "text-primary",
+  "Jornada do DNA": "text-chart-4",
+  "Calculadora DNAjá": "text-success",
+  "CRM Comercial": "text-chart-3",
   Tendências: "text-chart-3",
   Auditoria: "text-muted-foreground",
-  Configurações: "text-muted-foreground"
+  Configurações: "text-muted-foreground",
 };
 
 export function AppSidebar() {
   const { user, setRole, logout } = useAuth();
 
   const visibleItems = NAV_ITEMS.filter((item) =>
-  item.roles.includes(user?.role || "triagem")
+    item.roles.includes(user?.role || "triagem")
   );
 
   return (
@@ -71,15 +70,15 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {visibleItems.map((item) =>
-              <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
-                    to={item.url}
-                    end={item.url === "/"}
-                    className="hover:bg-sidebar-accent"
-                    activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
-                    
-                      <item.icon className={`mr-2 h-4 w-4 ${ICON_COLORS[item.title]}`} />
+                      to={item.url}
+                      end={item.url === "/"}
+                      className="hover:bg-sidebar-accent hover:translate-x-1 transition-all duration-200"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-sm"
+                    >
+                      <item.icon className={`mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${ICON_COLORS[item.title]}`} />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -114,10 +113,9 @@ export function AppSidebar() {
           size="sm"
           onClick={logout}
           className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground">
-          
           <LogOut className="mr-2 h-4 w-4" /> Sair
         </Button>
       </SidebarFooter>
-    </Sidebar>);
-
+    </Sidebar>
+  );
 }

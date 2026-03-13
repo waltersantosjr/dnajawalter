@@ -10,10 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Users, UserPlus, Dna, ChevronRight, ChevronLeft,
   CheckCircle2, Circle, AlertTriangle, XCircle, Upload, FileText,
-  Scale, User, FilePlus,
+  Scale, User, FilePlus, Tag,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 import { FichaDNAja } from "@/components/FichaDNAja";
 
 type ExamType = "duo" | "trio" | null;
@@ -30,7 +29,12 @@ interface Participant {
   phone: string;
   email: string;
   naturalDe: string;
+  endereco: string;
+  cep: string;
+  cidadeUf: string;
+  registroNasc: string;
   transplant: boolean | null;
+  parentescoInvestigado: string;
   documents: string[];
 }
 
@@ -45,25 +49,30 @@ const createParticipant = (role: string): Participant => ({
   phone: "",
   email: "",
   naturalDe: "",
+  endereco: "",
+  cep: "",
+  cidadeUf: "",
+  registroNasc: "",
   transplant: null,
+  parentescoInvestigado: "",
   documents: [],
 });
 
 const getDefaultParticipants = (type: ExamType): Participant[] => {
   switch (type) {
-    case "duo": return [createParticipant("Suposto Pai"), createParticipant("Filho(a)")];
-    case "trio": return [createParticipant("Suposto Pai"), createParticipant("Mãe"), createParticipant("Filho(a)")];
+    case "duo": return [createParticipant("Suposto Pai"), createParticipant("Filho(a) Investigante")];
+    case "trio": return [createParticipant("Mãe"), createParticipant("Filho(a) Investigante"), createParticipant("Suposto Pai")];
     default: return [];
   }
 };
 
-const STEPS = ["Tipo de Exame", "Participantes", "Ficha Cadastral", "Documentos", "Confirmação"];
+const STEPS = ["Tipo de Exame", "Etiqueta DNAjá", "Entrevista", "Documentos", "Confirmação"];
 
 const NovoExame = () => {
-  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [examType, setExamType] = useState<ExamType>(null);
   const [purpose, setPurpose] = useState<Purpose>(null);
+  const [etiquetaDNA, setEtiquetaDNA] = useState("");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [consent, setConsent] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
@@ -82,22 +91,18 @@ const NovoExame = () => {
       toast.error("Selecione o tipo e a finalidade do exame");
       return;
     }
+    if (step === 1 && !etiquetaDNA.trim()) {
+      toast.error("Digite a etiqueta do kit DNAjá");
+      return;
+    }
     setStep((s) => Math.min(s + 1, 4));
   };
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
   const finish = () => {
-    toast.success("Exame cadastrado com sucesso!", { description: `Tipo: ${examType?.toUpperCase()} - ${purpose}` });
+    toast.success("Exame cadastrado com sucesso!", { description: `Tipo: ${examType?.toUpperCase()} - ${purpose} - Kit: ${etiquetaDNA}` });
     setShowFicha(true);
   };
-
-  const pendencies: string[] = [];
-  participants.forEach((p) => {
-    if (!p.name) pendencies.push(`Nome de ${p.role}`);
-    if (p.transplant === null) pendencies.push(`Ficha de ${p.role}`);
-    if (p.documents.length === 0) pendencies.push(`Docs de ${p.role}`);
-  });
-  if (!consent && step >= 4) pendencies.push("Termo de consentimento");
 
   if (showFicha && examType && purpose) {
     return (
@@ -125,7 +130,7 @@ const NovoExame = () => {
       <div className="flex-1 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <FilePlus className="h-7 w-7 text-success" /> Novo Exame
+            <Users className="h-7 w-7 text-success" /> Duo ou Trio
           </h1>
           <p className="text-muted-foreground">Cadastro de exame de DNA — Duo ou Trio</p>
         </div>
@@ -166,7 +171,7 @@ const NovoExame = () => {
                     <UserPlus className="h-8 w-8 text-[hsl(330,81%,60%)]" />
                   </div>
                   <p className="text-xl font-bold">TRIO</p>
-                  <p className="text-sm text-muted-foreground text-center">Filho + Mãe + Suposto Pai</p>
+                  <p className="text-sm text-muted-foreground text-center">Mãe + Filho + Suposto Pai</p>
                   <Badge variant="outline" className="border-[hsl(330,81%,60%)] text-[hsl(330,81%,60%)]">3 participantes</Badge>
                 </CardContent>
               </Card>
@@ -198,84 +203,162 @@ const NovoExame = () => {
           </div>
         )}
 
-        {/* Step 1 - Participants */}
+        {/* Step 1 - Etiqueta DNAjá */}
         {step === 1 && (
-          <div className="space-y-4">
-            {participants.map((p) => (
-              <Card key={p.id}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Users className="h-4 w-4 text-primary" />
-                    {p.role}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Nome Completo *</Label>
-                      <Input value={p.name} onChange={(e) => updateParticipant(p.id, "name", e.target.value)} placeholder="Nome completo" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Data de Nascimento *</Label>
-                      <Input type="date" value={p.birthDate} onChange={(e) => updateParticipant(p.id, "birthDate", e.target.value)} />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Sexo *</Label>
-                      <Select value={p.sex} onValueChange={(v) => updateParticipant(p.id, "sex", v)}>
-                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="masculino">Masculino</SelectItem>
-                          <SelectItem value="feminino">Feminino</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">CPF / RG *</Label>
-                      <Input value={p.docNumber} onChange={(e) => updateParticipant(p.id, "docNumber", e.target.value)} placeholder="CPF ou RG" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Telefone</Label>
-                      <Input value={p.phone} onChange={(e) => updateParticipant(p.id, "phone", e.target.value)} placeholder="(00) 00000-0000" />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">E-mail</Label>
-                      <Input value={p.email} onChange={(e) => updateParticipant(p.id, "email", e.target.value)} placeholder="email@exemplo.com" />
-                    </div>
-                    <div className="space-y-1 sm:col-span-2">
-                      <Label className="text-xs">Natural de</Label>
-                      <Input value={p.naturalDe} onChange={(e) => updateParticipant(p.id, "naturalDe", e.target.value)} placeholder="Cidade - UF" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card className="border-2 border-dashed border-success">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-success">
+                <Tag className="h-5 w-5" /> Etiqueta do Kit DNAjá
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Digite ou bipe o código da etiqueta do kit DNAjá que será utilizado neste exame.
+              </p>
+              <div className="flex items-center justify-center">
+                <div className="rounded-xl border-2 border-success bg-success/5 p-6 w-full max-w-md">
+                  <Label className="text-sm font-bold text-success block text-center mb-3">COLE AQUI A ETIQUETA DNAJA</Label>
+                  <Input
+                    value={etiquetaDNA}
+                    onChange={(e) => setEtiquetaDNA(e.target.value)}
+                    className="text-center font-mono text-xl font-bold border-success/50 h-14"
+                    placeholder="DNAJA-2025-XXXXX"
+                    autoFocus
+                  />
+                  <p className="text-xs text-muted-foreground text-center mt-2">Este código vincula o kit ao exame</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Step 2 - Ficha Cadastral */}
+        {/* Step 2 - Interview / Entrevista (VGF style) */}
         {step === 2 && (
           <div className="space-y-4">
-            {participants.map((p) => (
-              <Card key={p.id}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{p.role}: {p.name || "(sem nome)"}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm">Transplante de medula nos últimos 12 meses?</Label>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant={p.transplant === true ? "destructive" : "outline"} onClick={() => updateParticipant(p.id, "transplant", true)}>Sim</Button>
-                      <Button size="sm" variant={p.transplant === false ? "default" : "outline"} onClick={() => updateParticipant(p.id, "transplant", false)}>Não</Button>
-                    </div>
-                    {p.transplant && (
-                      <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-2 text-sm text-destructive">
-                        <AlertTriangle className="h-4 w-4" /> Exame pode ser inconclusivo
-                      </div>
-                    )}
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-center">
+              <p className="text-xs font-semibold text-primary">📋 ENTREVISTAS — Preencha com letra maiúscula e legível. As assinaturas devem ser iguais às dos documentos de identificação.</p>
+            </div>
+            {participants.map((p) => {
+              const colorMap: Record<string, string> = {
+                "Mãe": "border-[hsl(330,81%,60%)] bg-[hsl(330,81%,60%)]",
+                "Filho(a) Investigante": "border-success bg-success",
+                "Suposto Pai": "border-primary bg-primary",
+              };
+              const headerColor = colorMap[p.role] || "border-info bg-info";
+              return (
+                <Card key={p.id} className="overflow-hidden">
+                  <div className={`${headerColor.split(" ")[1]} px-4 py-2 text-white font-bold text-sm`}>
+                    {p.role.toUpperCase()}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4 space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="sm:col-span-2 space-y-1">
+                        <Label className="text-xs font-bold">Nome Completo *</Label>
+                        <Input value={p.name} onChange={(e) => updateParticipant(p.id, "name", e.target.value)} placeholder="Nome completo" />
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">CPF</Label>
+                        <Input value={p.docNumber} onChange={(e) => updateParticipant(p.id, "docNumber", e.target.value)} placeholder="000.000.000-00" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">RG</Label>
+                        <Input placeholder="RG" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">Sexo</Label>
+                        <Select value={p.sex} onValueChange={(v) => updateParticipant(p.id, "sex", v)}>
+                          <SelectTrigger><SelectValue placeholder="Sel." /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="masculino">M</SelectItem>
+                            <SelectItem value="feminino">F</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">Decl. Nasc. Vivo</Label>
+                        <Input value={p.registroNasc} onChange={(e) => updateParticipant(p.id, "registroNasc", e.target.value)} placeholder="Nº Registro" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">Registro Nasc.</Label>
+                        <Input placeholder="Nº Registro" />
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">Endereço</Label>
+                        <Input value={p.endereco} onChange={(e) => updateParticipant(p.id, "endereco", e.target.value)} placeholder="Endereço completo" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">CEP</Label>
+                        <Input value={p.cep} onChange={(e) => updateParticipant(p.id, "cep", e.target.value)} placeholder="00000-000" />
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">Cidade/UF</Label>
+                        <Input value={p.cidadeUf} onChange={(e) => updateParticipant(p.id, "cidadeUf", e.target.value)} placeholder="Cidade - UF" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">📞 Telefone</Label>
+                        <Input value={p.phone} onChange={(e) => updateParticipant(p.id, "phone", e.target.value)} placeholder="( ) _____-____" />
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">📅 Data de Nascimento</Label>
+                        <Input type="date" value={p.birthDate} onChange={(e) => updateParticipant(p.id, "birthDate", e.target.value)} />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold">🌍 Natural de</Label>
+                        <Input value={p.naturalDe} onChange={(e) => updateParticipant(p.id, "naturalDe", e.target.value)} placeholder="Cidade - UF" />
+                      </div>
+                    </div>
+                    {/* Interview questions */}
+                    <div className="rounded-lg bg-muted/50 p-3 space-y-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold">Realizou transfusão de sangue e/ou transplante de medula óssea nos últimos 3 meses?</Label>
+                        <div className="flex gap-3">
+                          <Button size="sm" variant={p.transplant === false ? "default" : "outline"} onClick={() => updateParticipant(p.id, "transplant", false)}>Não</Button>
+                          <Button size="sm" variant={p.transplant === true ? "destructive" : "outline"} onClick={() => updateParticipant(p.id, "transplant", true)}>Sim</Button>
+                        </div>
+                        {p.transplant && (
+                          <div className="flex items-center gap-2 rounded-md bg-destructive/10 p-2 text-xs text-destructive">
+                            <AlertTriangle className="h-3 w-3" /> Pode comprometer o resultado do exame
+                          </div>
+                        )}
+                      </div>
+                      {p.role.toLowerCase().includes("pai") && (
+                        <>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Existe parentesco em 1º grau entre as partes investigante e investigado? Qual parentesco?</Label>
+                            <div className="flex gap-3 items-center">
+                              <Button size="sm" variant="outline">Não</Button>
+                              <Button size="sm" variant="outline">Sim</Button>
+                              <Input placeholder="Qual?" className="max-w-[150px] h-8 text-xs" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-bold">Existe a possibilidade de um parente em 1º grau do Suposto Pai ser o verdadeiro Pai Biológico?</Label>
+                            <div className="flex gap-3 items-center">
+                              <Button size="sm" variant="outline">Não</Button>
+                              <Button size="sm" variant="outline">Sim</Button>
+                              <div className="flex gap-2">
+                                <label className="flex items-center gap-1 text-xs"><input type="radio" name={`parenteType_${p.id}`} /> Materno</label>
+                                <label className="flex items-center gap-1 text-xs"><input type="radio" name={`parenteType_${p.id}`} /> Paterno</label>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
 
@@ -288,7 +371,7 @@ const NovoExame = () => {
                   <CardTitle className="text-base">{p.role}: {p.name || "(sem nome)"}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {["RG", "CPF", "Certidão de Nascimento"].map((doc) => {
+                  {["RG", "CPF", "Certidão de Nascimento", "Decl. Nascido Vivo"].map((doc) => {
                     const uploaded = p.documents.includes(doc);
                     return (
                       <div key={doc} className="flex items-center justify-between rounded-md border p-3">
@@ -329,6 +412,7 @@ const NovoExame = () => {
                 <div className="grid gap-2 text-sm">
                   <p><strong>Tipo:</strong> {examType?.toUpperCase()}</p>
                   <p><strong>Finalidade:</strong> {purpose === "judicial" ? "⚖️ Judicial" : "👤 Particular"}</p>
+                  <p><strong>Etiqueta DNAjá:</strong> <span className="font-mono font-bold text-success">{etiquetaDNA}</span></p>
                   <p><strong>Participantes:</strong> {participants.length}</p>
                 </div>
                 {participants.map((p) => (
@@ -386,12 +470,10 @@ const NovoExame = () => {
                 <span className={i <= step ? "font-medium" : "text-muted-foreground"}>{s}</span>
               </div>
             ))}
-            {pendencies.length > 0 && (
-              <div className="mt-4 space-y-1 border-t pt-3">
-                <p className="font-semibold text-destructive text-xs">Pendências ({pendencies.length})</p>
-                {pendencies.slice(0, 5).map((p) => (
-                  <p key={p} className="text-xs text-muted-foreground">• {p}</p>
-                ))}
+            {etiquetaDNA && (
+              <div className="mt-3 pt-3 border-t">
+                <p className="text-xs text-muted-foreground">Kit DNAjá</p>
+                <p className="font-mono font-bold text-success">{etiquetaDNA}</p>
               </div>
             )}
           </CardContent>
