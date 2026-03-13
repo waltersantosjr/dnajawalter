@@ -4,19 +4,26 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Barcode, Calendar, AlertTriangle, CheckCircle2, Package, Receipt, DollarSign } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Barcode, AlertTriangle, CheckCircle2, Package, Receipt, DollarSign,
+  Home, Building2, ShoppingCart, Plus, Trash2, Tag, Printer,
+  CreditCard, Banknote, Smartphone, CircleDot, Ticket, X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 type NfType = "produto" | "servico" | "ecommerce" | "";
+type Modalidade = "auto_coleta" | "presencial";
+type Pagamento = "dinheiro" | "credito" | "debito" | "pix";
 
-interface Sale {
+interface CartItem {
   id: string;
-  kit: string;
+  barcode: string;
+  etiqueta: string;
+  kitPrice: number;
+  salePrice: number;
+  modalidade: Modalidade;
   date: string;
-  kitPrice: string;
-  salePrice: string;
-  nfType: NfType;
 }
 
 const NF_LABELS: Record<string, string> = {
@@ -25,173 +32,384 @@ const NF_LABELS: Record<string, string> = {
   ecommerce: "NF E-commerce",
 };
 
+const NF_DESC: Record<string, string> = {
+  produto: "Nota Fiscal de Produto (ICMS)",
+  servico: "Nota Fiscal de Serviço (ISS)",
+  ecommerce: "Venda online / marketplace",
+};
+
+const PAGAMENTO_OPTIONS: { id: Pagamento; label: string; icon: React.ElementType }[] = [
+  { id: "dinheiro", label: "Dinheiro", icon: Banknote },
+  { id: "credito", label: "Crédito", icon: CreditCard },
+  { id: "debito", label: "Débito", icon: CreditCard },
+  { id: "pix", label: "PIX", icon: Smartphone },
+];
+
 const DNAja = () => {
-  const [kitCode, setKitCode] = useState("");
-  const [kitPrice, setKitPrice] = useState("299,90");
-  const [salePrice, setSalePrice] = useState("499,90");
+  const [modalidade, setModalidade] = useState<Modalidade>("auto_coleta");
+  const [barcode, setBarcode] = useState("");
+  const [etiqueta, setEtiqueta] = useState("");
+  const [kitPrice, setKitPrice] = useState("0,00");
+  const [salePrice, setSalePrice] = useState("0,00");
   const [nfType, setNfType] = useState<NfType>("");
-  const [sales, setSales] = useState<Sale[]>([
-    { id: "1", kit: "DNA-2026-00041", date: "19/02/2026", kitPrice: "299,90", salePrice: "499,90", nfType: "produto" },
-    { id: "2", kit: "DNA-2026-00040", date: "19/02/2026", kitPrice: "299,90", salePrice: "449,90", nfType: "servico" },
-    { id: "3", kit: "DNA-2026-00039", date: "19/02/2026", kitPrice: "299,90", salePrice: "499,90", nfType: "ecommerce" },
+  const [pagamento, setPagamento] = useState<Pagamento | "">("");
+  const [desconto, setDesconto] = useState("0,00");
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [sales, setSales] = useState<{ barcode: string; etiqueta: string; status: string }[]>([
+    { barcode: "1111111111111", etiqueta: "TRK-IHEV6CIL", status: "vendido" },
   ]);
+  const [showVoucher, setShowVoucher] = useState<CartItem | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!kitCode.trim()) {
-      toast.error("Digite ou bipe o código do kit");
-      return;
-    }
-    if (!nfType) {
-      toast.error("Selecione o tipo de nota fiscal");
-      return;
-    }
-    const newSale: Sale = {
+  const parseBRL = (v: string) => parseFloat(v.replace(",", ".")) || 0;
+
+  const addToCart = () => {
+    if (!barcode.trim()) { toast.error("Digite ou bipe o código de barras"); return; }
+    const item: CartItem = {
       id: Date.now().toString(),
-      kit: kitCode,
+      barcode,
+      etiqueta,
+      kitPrice: parseBRL(kitPrice),
+      salePrice: parseBRL(salePrice),
+      modalidade,
       date: new Date().toLocaleDateString("pt-BR"),
-      kitPrice,
-      salePrice,
-      nfType,
     };
-    setSales([newSale, ...sales]);
-    setKitCode("");
-    toast.success("Venda registrada com sucesso!", {
-      description: `Kit ${kitCode} · R$ ${salePrice} · ${NF_LABELS[nfType]}`,
-    });
+    setCart([...cart, item]);
+    setBarcode("");
+    setEtiqueta("");
+    toast.success("Kit adicionado ao carrinho");
   };
 
-  const generateNf = (sale: Sale) => {
-    toast.success(`${NF_LABELS[sale.nfType]} gerada!`, {
-      description: `Kit ${sale.kit} · R$ ${sale.salePrice}`,
+  const removeFromCart = (id: string) => setCart(cart.filter(c => c.id !== id));
+
+  const subtotal = cart.reduce((a, c) => a + c.salePrice, 0);
+  const custoTotal = cart.reduce((a, c) => a + c.kitPrice, 0);
+  const descontoVal = parseBRL(desconto);
+  const total = Math.max(subtotal - descontoVal, 0);
+
+  const finalizarVenda = () => {
+    if (cart.length === 0) { toast.error("Adicione kits ao carrinho"); return; }
+    if (!nfType) { toast.error("Selecione o tipo de nota fiscal"); return; }
+    if (!pagamento) { toast.error("Selecione a forma de pagamento"); return; }
+
+    const presenciais = cart.filter(c => c.modalidade === "presencial");
+    cart.forEach(c => {
+      setSales(prev => [...prev, { barcode: c.barcode, etiqueta: c.etiqueta || `DNA${c.id.slice(-4)}`, status: "vendido" }]);
     });
+
+    toast.success(`Venda finalizada! ${cart.length} kit(s) · R$ ${total.toFixed(2)}`);
+
+    if (presenciais.length > 0) {
+      setShowVoucher(presenciais[0]);
+    }
+
+    setCart([]);
   };
+
+  // Voucher for presencial
+  if (showVoucher) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-auto bg-background/95 print:relative print:bg-white">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background p-4 print:hidden">
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <Ticket className="h-5 w-5 text-success" /> Voucher de Coleta Presencial
+          </h2>
+          <div className="flex gap-2">
+            <Button onClick={() => window.print()} className="gap-2"><Printer className="h-4 w-4" /> Imprimir</Button>
+            <Button variant="outline" onClick={() => setShowVoucher(null)}><X className="h-4 w-4" /></Button>
+          </div>
+        </div>
+        <div className="mx-auto max-w-xl p-8 print:p-4">
+          <div className="rounded-xl border-2 border-success p-8 space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-2xl font-bold text-success">🧬 VOUCHER DE COLETA PRESENCIAL</h1>
+              <p className="text-sm text-muted-foreground">DNAjá® - Kit Auto Coleta</p>
+              <Separator />
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><p className="text-xs text-muted-foreground">Código de Barras</p><p className="font-mono font-bold">{showVoucher.barcode}</p></div>
+              <div><p className="text-xs text-muted-foreground">Etiqueta DNA</p><p className="font-mono font-bold">{showVoucher.etiqueta || "—"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Data de Emissão</p><p className="font-bold">{showVoucher.date}</p></div>
+              <div><p className="text-xs text-muted-foreground">Validade</p><p className="font-bold text-warning">30 dias</p></div>
+            </div>
+            <Separator />
+            <div className="rounded-lg bg-success/10 p-4 space-y-2">
+              <p className="font-bold text-success text-sm">📍 Instruções para o Cliente</p>
+              <ol className="text-xs text-muted-foreground space-y-1 list-decimal pl-4">
+                <li>Apresente este voucher em qualquer laboratório credenciado DNAjá®</li>
+                <li>Leve documento com foto (RG ou CNH) de todos os participantes</li>
+                <li>A coleta é indolor — feita por swab bucal (cotonete na bochecha)</li>
+                <li>O resultado será enviado em até 5 dias úteis</li>
+              </ol>
+            </div>
+            <div className="rounded-lg border-2 border-dashed border-muted-foreground/30 p-4 space-y-2">
+              <p className="text-xs font-bold text-center text-muted-foreground">LABORATÓRIOS CREDENCIADOS</p>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>• DNAjá — São Paulo/SP</p>
+                <p>• DNAjá — Campinas/SP</p>
+                <p>• DNAjá — Ribeirão Preto/SP</p>
+                <p>• BioGenetics — Uberlândia/MG</p>
+              </div>
+            </div>
+            <div className="rounded-lg bg-warning/10 p-3 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+              <p className="text-xs text-warning font-semibold">SEM VALIDADE JUDICIAL — Kit apenas informativo (Peace of Mind)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Package className="h-7 w-7 text-warning" />
-          DNAjá - Venda Rápida
-        </h1>
-        <p className="text-muted-foreground">Registro de venda de kits de auto coleta</p>
-      </div>
-
-      <div className="rounded-lg border-2 border-warning/30 bg-warning/5 p-4">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-warning" />
-          <p className="font-semibold text-warning">SEM VALIDADE JUDICIAL</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Package className="h-7 w-7 text-warning" />
+            DNAjá PDV - Ponto de Venda
+          </h1>
+          <p className="text-muted-foreground">Registro de venda de kits de auto coleta</p>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Kit apenas informativo (Peace of Mind). Resultado sem validade judicial.
-        </p>
+        <Badge variant="outline" className="border-success text-success gap-1.5 px-3 py-1">
+          <CircleDot className="h-3 w-3 fill-success" /> Sistema Online
+        </Badge>
       </div>
 
-      <Card className="shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg">Registrar Venda</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="kit" className="text-base font-semibold">Código do Kit</Label>
-              <div className="relative">
-                <Barcode className="absolute left-3 top-3 h-5 w-5 text-warning" />
-                <Input
-                  id="kit"
-                  value={kitCode}
-                  onChange={(e) => setKitCode(e.target.value)}
-                  className="h-12 pl-11 text-lg font-mono"
-                  placeholder="DNA-2026-XXXXX"
-                  autoFocus
-                />
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        {/* LEFT COLUMN */}
+        <div className="space-y-4">
+          {/* Warning */}
+          <div className="rounded-lg border-2 border-warning/30 bg-warning/5 p-4 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
+            <p className="text-sm">
+              <strong className="text-warning">SEM VALIDADE JUDICIAL</strong> — Kits DNAjá são apenas informativos (Peace of Mind).
+            </p>
+          </div>
+
+          {/* Add Kit Card */}
+          <Card className="border-success/30 overflow-hidden">
+            <div className="bg-gradient-to-r from-success to-success/80 px-5 py-4 text-white">
+              <div className="flex items-center gap-3">
+                <ShoppingCart className="h-6 w-6" />
+                <div>
+                  <p className="font-bold text-lg">Adicionar Kit ao Carrinho</p>
+                  <p className="text-sm opacity-90">Bipe ou digite os dados do kit</p>
+                </div>
               </div>
             </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-1">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" /> Valor do Kit (custo)
-                </Label>
-                <Input
-                  value={kitPrice}
-                  onChange={(e) => setKitPrice(e.target.value)}
-                  placeholder="0,00"
-                  className="font-mono"
-                />
+            <CardContent className="p-5 space-y-4">
+              {/* Modalidade */}
+              <div>
+                <p className="font-bold text-sm mb-2">Modalidade</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setModalidade("auto_coleta")}
+                    className={`rounded-xl border-2 p-3 text-left transition-all ${modalidade === "auto_coleta" ? "border-success bg-success/5 shadow-sm" : "border-border hover:border-muted-foreground/30"}`}
+                  >
+                    <Home className={`h-5 w-5 mb-1 ${modalidade === "auto_coleta" ? "text-success" : "text-muted-foreground"}`} />
+                    <p className="font-semibold text-sm">Auto Coleta</p>
+                    <p className="text-xs text-muted-foreground">Cliente coleta em casa</p>
+                  </button>
+                  <button
+                    onClick={() => setModalidade("presencial")}
+                    className={`rounded-xl border-2 p-3 text-left transition-all ${modalidade === "presencial" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-muted-foreground/30"}`}
+                  >
+                    <Building2 className={`h-5 w-5 mb-1 ${modalidade === "presencial" ? "text-primary" : "text-muted-foreground"}`} />
+                    <p className="font-semibold text-sm">Coleta Presencial</p>
+                    <p className="text-xs text-muted-foreground">Coleta no laboratório</p>
+                  </button>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold flex items-center gap-1">
-                  <DollarSign className="h-4 w-4 text-success" /> Valor da Venda (cliente)
-                </Label>
-                <Input
-                  value={salePrice}
-                  onChange={(e) => setSalePrice(e.target.value)}
-                  placeholder="0,00"
-                  className="font-mono"
-                />
+
+              {/* Barcode + Etiqueta */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold flex items-center gap-1">
+                    <Barcode className="h-4 w-4 text-muted-foreground" /> Cód. de Barras *
+                  </Label>
+                  <Input
+                    value={barcode}
+                    onChange={(e) => setBarcode(e.target.value)}
+                    className="font-mono"
+                    placeholder="DNA-2026-XXXXX"
+                    autoFocus
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold flex items-center gap-1">
+                    <Tag className="h-4 w-4 text-muted-foreground" /> Etiqueta DNA
+                  </Label>
+                  <Input
+                    value={etiqueta}
+                    onChange={(e) => setEtiqueta(e.target.value)}
+                    className="font-mono"
+                    placeholder="DNA0011"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold flex items-center gap-1">
-                <Receipt className="h-4 w-4 text-primary" /> Tipo de Nota Fiscal
-              </Label>
-              <Select value={nfType} onValueChange={(v) => setNfType(v as NfType)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo de NF" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="produto">NF Produto</SelectItem>
-                  <SelectItem value="servico">NF Serviço</SelectItem>
-                  <SelectItem value="ecommerce">NF E-commerce</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Data de venda: <strong>{new Date().toLocaleDateString("pt-BR")}</strong> (automática)
-              </span>
-            </div>
-
-            <Button type="submit" size="lg" className="w-full text-base">
-              <CheckCircle2 className="mr-2 h-5 w-5" />
-              Registrar Venda
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Vendas do Dia ({sales.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {sales.map((sale) => (
-              <div key={sale.id} className="flex items-center justify-between rounded-lg border p-3">
-                <div className="flex items-center gap-3">
-                  <Barcode className="h-4 w-4 text-warning" />
-                  <div>
-                    <p className="font-mono font-medium">{sale.kit}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {sale.date} · Custo: R$ {sale.kitPrice} · Venda: R$ {sale.salePrice}
-                    </p>
+              {/* Prices */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold flex items-center gap-1">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" /> Valor do Kit (custo)
+                  </Label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground">R$</span>
+                    <Input value={kitPrice} onChange={(e) => setKitPrice(e.target.value)} className="font-mono" placeholder="0,00" />
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{NF_LABELS[sale.nfType] || "—"}</Badge>
-                  <Button size="sm" variant="outline" onClick={() => generateNf(sale)}>
-                    <Receipt className="mr-1 h-3 w-3" /> Gerar NF
-                  </Button>
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold flex items-center gap-1">
+                    <DollarSign className="h-4 w-4 text-success" /> Valor de Venda (cliente)
+                  </Label>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground">R$</span>
+                    <Input value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="font-mono" placeholder="0,00" />
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
+              <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={addToCart}>
+                <Plus className="mr-2 h-5 w-5" /> Adicionar ao Carrinho
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Recent Sales */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-muted-foreground" /> Últimas Vendas Registradas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {sales.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-2 w-2 rounded-full bg-success" />
+                      <span className="font-mono text-sm">{s.barcode}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-success text-success text-xs">{s.status}</Badge>
+                      <Badge variant="secondary" className="text-xs font-mono">{s.etiqueta}</Badge>
+                    </div>
+                  </div>
+                ))}
+                {sales.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Nenhuma venda registrada</p>}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div className="space-y-4">
+          {/* Nota Fiscal */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-muted-foreground" /> Nota Fiscal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {(["produto", "servico", "ecommerce"] as NfType[]).map(nf => (
+                <button
+                  key={nf}
+                  onClick={() => setNfType(nf)}
+                  className={`w-full rounded-lg border-2 p-3 text-left transition-all ${nfType === nf ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}
+                >
+                  <p className="font-semibold text-sm">{NF_LABELS[nf]}</p>
+                  <p className="text-xs text-muted-foreground">{NF_DESC[nf]}</p>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Pagamento */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-muted-foreground" /> Pagamento
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-2">
+                {PAGAMENTO_OPTIONS.map(op => (
+                  <button
+                    key={op.id}
+                    onClick={() => setPagamento(op.id)}
+                    className={`rounded-lg border-2 p-3 flex flex-col items-center gap-1.5 transition-all ${pagamento === op.id ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}
+                  >
+                    <op.icon className={`h-5 w-5 ${pagamento === op.id ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className="text-xs font-semibold">{op.label}</span>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Resumo */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Receipt className="h-4 w-4 text-muted-foreground" /> Resumo da Venda
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {cart.length > 0 && (
+                <div className="space-y-2">
+                  {cart.map(item => (
+                    <div key={item.id} className="flex items-center justify-between text-sm rounded-md border p-2">
+                      <div>
+                        <p className="font-mono text-xs">{item.barcode}</p>
+                        <p className="text-xs text-muted-foreground">{item.modalidade === "presencial" ? "Presencial" : "Auto Coleta"}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm">R$ {item.salePrice.toFixed(2)}</span>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeFromCart(item.id)}>
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Separator />
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal ({cart.length} kits)</span>
+                  <span className="font-mono">R$ {subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Custo total</span>
+                  <span className="font-mono text-muted-foreground">R$ {custoTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Desconto R$</span>
+                  <Input value={desconto} onChange={e => setDesconto(e.target.value)} className="w-24 h-7 text-xs font-mono text-right" />
+                </div>
+              </div>
+              <Separator />
+              <div className="flex justify-between items-baseline">
+                <span className="text-lg font-bold">Total a Pagar</span>
+                <span className="text-2xl font-bold text-success font-mono">R$ {total.toFixed(2)}</span>
+              </div>
+              <Button
+                className="w-full bg-success hover:bg-success/90 text-white"
+                size="lg"
+                disabled={cart.length === 0}
+                onClick={finalizarVenda}
+              >
+                <CheckCircle2 className="mr-2 h-5 w-5" /> Finalizar Venda
+              </Button>
+              {cart.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center">Adicione kits ao carrinho para finalizar.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
