@@ -124,7 +124,8 @@ const SimuladorPrecos = () => {
   const valorVenda = valorVendaCustom ? parseFloat(valorVendaCustom.replace(",", ".")) || valorTabela : valorTabela;
   const custoTerc = valorTerceirizado ? parseFloat(valorTerceirizado.replace(",", ".")) || 0 : 0;
   const custoKit = valorKit ? parseFloat(valorKit.replace(",", ".")) || 0 : 0;
-  const custoTotal = custoTerc + custoKit;
+  const comissaoVal = comissao ? parseFloat(comissao.replace(",", ".")) || 0 : 0;
+  const custoTotal = custoTerc + custoKit + comissaoVal;
 
   let taxInfo: TaxInfo;
   let totalTaxRate: number;
