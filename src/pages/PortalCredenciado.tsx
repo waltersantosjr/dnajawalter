@@ -56,7 +56,11 @@ const PORTAIS = [
 
 const PortalCredenciado = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  return (
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
