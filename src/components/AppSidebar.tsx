@@ -26,6 +26,8 @@ const NAV_ITEMS = [
   { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
   { title: "Etiquetas", url: "/etiquetas", icon: Barcode, roles: ["admin", "coletor"] },
   { title: "IPM", url: "/ipm", icon: ClipboardList, roles: ["admin", "coletor"] },
+  { title: "Portal Credenciado", url: "/portal", icon: Building2, roles: ["admin"] },
+  { title: "Profissionais", url: "/profissionais", icon: ShieldCheck, roles: ["admin"] },
   { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
   { title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
   { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] },
