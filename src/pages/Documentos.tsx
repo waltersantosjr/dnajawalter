@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import {
   FileText, Receipt, Scale, Building2, Shield, Printer,
-  Download, CheckCircle2,
+  Download, CheckCircle2, AlertTriangle, User, Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,23 +22,18 @@ const Documentos = () => {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <FileText className="h-7 w-7 text-primary" /> Documentos e Orçamentos
         </h1>
-        <p className="text-muted-foreground">Gere declarações, orçamentos e ofícios</p>
+        <p className="text-muted-foreground">Gere declarações, orçamentos, ofícios e documentos personalizados</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="declaracoes">
-            <Shield className="mr-1 h-4 w-4" /> Declarações
-          </TabsTrigger>
-          <TabsTrigger value="orcamentos">
-            <Receipt className="mr-1 h-4 w-4" /> Orçamentos
-          </TabsTrigger>
-          <TabsTrigger value="oficios">
-            <Building2 className="mr-1 h-4 w-4" /> Ofícios
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="declaracoes"><Shield className="mr-1 h-4 w-4" /> Declarações</TabsTrigger>
+          <TabsTrigger value="orcamentos"><Receipt className="mr-1 h-4 w-4" /> Orçamentos</TabsTrigger>
+          <TabsTrigger value="oficios"><Building2 className="mr-1 h-4 w-4" /> Ofícios</TabsTrigger>
+          <TabsTrigger value="personalizado"><Briefcase className="mr-1 h-4 w-4" /> Personalizado</TabsTrigger>
         </TabsList>
 
-        {/* ─── Declarações ─── */}
+        {/* Declarações */}
         <TabsContent value="declaracoes" className="space-y-4 mt-4">
           <Card>
             <CardHeader>
@@ -47,199 +42,196 @@ const Documentos = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Nome do Participante</Label>
-                  <Input placeholder="Nome completo" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">RG / CPF</Label>
-                  <Input placeholder="Documento" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Nome do Participante</Label><Input placeholder="Nome completo" /></div>
+                <div className="space-y-1"><Label className="text-xs">RG / CPF</Label><Input placeholder="Documento" /></div>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Tipo de Exame</Label>
-                <Select>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="duo">Duo</SelectItem>
-                    <SelectItem value="trio">Trio</SelectItem>
-                    <SelectItem value="reconstituicao">Reconstituição Genética</SelectItem>
-                    <SelectItem value="irmandade">Irmandade</SelectItem>
-                  </SelectContent>
+                <Select><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent><SelectItem value="duo">Duo</SelectItem><SelectItem value="trio">Trio</SelectItem><SelectItem value="reconstituicao">Reconstituição</SelectItem><SelectItem value="irmandade">Irmandade</SelectItem></SelectContent>
                 </Select>
               </div>
-              <Button onClick={() => toast.success("TCU gerado com sucesso! (simulação)")}>
-                <Printer className="mr-1 h-4 w-4" /> Gerar TCU
-              </Button>
+              <Button onClick={() => toast.success("TCU gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar TCU</Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Termo de Reconstituição e Veracidade (TRV)</CardTitle>
-              <CardDescription>Para reconstituição genética e testes de irmandade</CardDescription>
+              <CardDescription>Para reconstituição genética</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Parente Colaborador</Label>
-                  <Input placeholder="Nome completo" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">RG / CPF</Label>
-                  <Input placeholder="Documento" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Grau de Parentesco</Label>
-                  <Input placeholder="Ex: Irmão germano" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Nome do Suposto Pai Falecido</Label>
-                  <Input placeholder="Nome completo" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Parente Colaborador</Label><Input placeholder="Nome completo" /></div>
+                <div className="space-y-1"><Label className="text-xs">RG / CPF</Label><Input placeholder="Documento" /></div>
+                <div className="space-y-1"><Label className="text-xs">Grau de Parentesco</Label><Input placeholder="Ex: Irmão germano" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nome do Suposto Pai Falecido</Label><Input placeholder="Nome completo" /></div>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Nº Certidão de Óbito</Label>
-                <Input placeholder="Número da certidão" />
-              </div>
-              <Button onClick={() => toast.success("TRV gerado com sucesso! (simulação)")}>
-                <Printer className="mr-1 h-4 w-4" /> Gerar TRV
-              </Button>
+              <div className="space-y-1"><Label className="text-xs">Nº Certidão de Óbito</Label><Input placeholder="Número da certidão" /></div>
+              <Button onClick={() => toast.success("TRV gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar TRV</Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Declaração de Resultado Inconclusivo</CardTitle>
-              <CardDescription>Para cenários sem índice conclusivo — partes devem assinar</CardDescription>
+              <CardDescription>Para cenários sem índice conclusivo</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Nº do Caso</Label>
-                  <Input placeholder="EX-2026-XXXX" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Probabilidade Obtida (%)</Label>
-                  <Input placeholder="Ex: 87,5" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Nº do Caso</Label><Input placeholder="EX-2026-XXXX" /></div>
+                <div className="space-y-1"><Label className="text-xs">Probabilidade Obtida (%)</Label><Input placeholder="Ex: 87,5" /></div>
               </div>
-              <p className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
-                "Declaro estar ciente de que o resultado obtido situa-se na zona cinzenta (80-95%), 
-                não sendo suficiente para presunção de paternidade. Recomenda-se ampliação de painel 
-                ou inclusão de novos parentes de 1º grau."
-              </p>
-              <Button onClick={() => toast.success("Declaração gerada! (simulação)")}>
-                <Printer className="mr-1 h-4 w-4" /> Gerar Declaração
-              </Button>
+              <p className="text-xs text-muted-foreground bg-muted p-3 rounded-md">"Declaro estar ciente de que o resultado situa-se na zona cinzenta (80-95%), não sendo suficiente para presunção de paternidade."</p>
+              <Button onClick={() => toast.success("Declaração gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Declaração de Cadeia de Custódia</CardTitle>
+              <CardDescription>Comprova a integridade das amostras coletadas</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1"><Label className="text-xs">Nº do Caso</Label><Input placeholder="EX-2026-XXXX" /></div>
+                <div className="space-y-1"><Label className="text-xs">Perito Responsável</Label><Input placeholder="Nome do perito" /></div>
+                <div className="space-y-1"><Label className="text-xs">CRBio / CRF</Label><Input placeholder="Registro profissional" /></div>
+                <div className="space-y-1"><Label className="text-xs">Data da Coleta</Label><Input type="date" /></div>
+              </div>
+              <Button onClick={() => toast.success("Declaração de Cadeia de Custódia gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Declaração de Desistência / Não Comparecimento</CardTitle>
+              <CardDescription>Quando uma das partes não comparece à coleta</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1"><Label className="text-xs">Nome do Ausente</Label><Input placeholder="Nome completo" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº do Caso / Processo</Label><Input placeholder="EX-2026-XXXX" /></div>
+                <div className="space-y-1"><Label className="text-xs">Data Agendada</Label><Input type="date" /></div>
+                <div className="space-y-1"><Label className="text-xs">Motivo</Label><Input placeholder="Não compareceu / Desistência" /></div>
+              </div>
+              <Button onClick={() => toast.success("Declaração gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* ─── Orçamentos ─── */}
+        {/* Orçamentos */}
         <TabsContent value="orcamentos" className="space-y-4 mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Gerar Orçamento</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg">Gerar Orçamento</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Cliente</Label>
-                  <Input placeholder="Nome ou razão social" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">CPF / CNPJ</Label>
-                  <Input placeholder="Documento" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Cliente</Label><Input placeholder="Nome ou razão social" /></div>
+                <div className="space-y-1"><Label className="text-xs">CPF / CNPJ</Label><Input placeholder="Documento" /></div>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Modalidade do Exame</Label>
-                <Select>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <Select><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="duo">Duo (2 participantes)</SelectItem>
-                    <SelectItem value="trio">Trio (3 participantes)</SelectItem>
-                    <SelectItem value="reconstituicao">Reconstituição Genética</SelectItem>
-                    <SelectItem value="perfil">Perfil Genético Individual</SelectItem>
-                    <SelectItem value="dnaja">DNAjá (Kit Auto Coleta)</SelectItem>
+                    <SelectItem value="duo">Duo</SelectItem><SelectItem value="trio">Trio</SelectItem>
+                    <SelectItem value="reconstituicao">Reconstituição</SelectItem><SelectItem value="perfil">Perfil Individual</SelectItem>
+                    <SelectItem value="dnaja">DNAjá</SelectItem><SelectItem value="ipm">IPM (Post Mortem)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Valor (R$)</Label>
-                  <Input placeholder="0,00" className="font-mono" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Validade do Orçamento</Label>
-                  <Input type="date" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Valor (R$)</Label><Input placeholder="0,00" className="font-mono" /></div>
+                <div className="space-y-1"><Label className="text-xs">Validade</Label><Input type="date" /></div>
               </div>
-              <Button onClick={() => toast.success("Orçamento gerado! (simulação)")}>
-                <Download className="mr-1 h-4 w-4" /> Gerar Orçamento PDF
-              </Button>
+              <Button onClick={() => toast.success("Orçamento gerado!")}><Download className="mr-1 h-4 w-4" /> Gerar PDF</Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* ─── Ofícios ─── */}
+        {/* Ofícios */}
         <TabsContent value="oficios" className="space-y-4 mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Ofício para Fórum / Comarca</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg">Ofício para Fórum / Comarca</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Comarca / Fórum</Label>
-                  <Input placeholder="Ex: 2ª Vara de Família - São Paulo" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Nº do Processo</Label>
-                  <Input placeholder="Nº do processo judicial" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Juiz(a) Responsável</Label>
-                  <Input placeholder="Nome" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Nº do Caso (interno)</Label>
-                  <Input placeholder="EX-2026-XXXX" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Comarca / Fórum</Label><Input placeholder="Ex: 2ª Vara de Família" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº do Processo</Label><Input placeholder="Nº processo" /></div>
+                <div className="space-y-1"><Label className="text-xs">Juiz(a)</Label><Input placeholder="Nome" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº Caso (interno)</Label><Input placeholder="EX-2026-XXXX" /></div>
               </div>
-              <Button onClick={() => toast.success("Ofício para fórum gerado! (simulação)")}>
-                <Printer className="mr-1 h-4 w-4" /> Gerar Ofício
-              </Button>
+              <Button onClick={() => toast.success("Ofício gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar Ofício</Button>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Ofício para Defensoria Pública</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg">Ofício para Defensoria Pública</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <Label className="text-xs">Defensoria</Label>
-                  <Input placeholder="Ex: Defensoria Pública do Estado de SP" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Defensor(a)</Label>
-                  <Input placeholder="Nome do defensor" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Assistido(a)</Label>
-                  <Input placeholder="Nome do assistido" />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Nº Atendimento</Label>
-                  <Input placeholder="Nº do atendimento" />
-                </div>
+                <div className="space-y-1"><Label className="text-xs">Defensoria</Label><Input placeholder="Ex: Defensoria Pública do Estado de SP" /></div>
+                <div className="space-y-1"><Label className="text-xs">Defensor(a)</Label><Input placeholder="Nome" /></div>
+                <div className="space-y-1"><Label className="text-xs">Assistido(a)</Label><Input placeholder="Nome do assistido" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº Atendimento</Label><Input placeholder="Nº" /></div>
               </div>
-              <Button onClick={() => toast.success("Ofício para defensoria gerado! (simulação)")}>
-                <Printer className="mr-1 h-4 w-4" /> Gerar Ofício
-              </Button>
+              <Button onClick={() => toast.success("Ofício gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar Ofício</Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Personalizado */}
+        <TabsContent value="personalizado" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2"><Briefcase className="h-5 w-5 text-chart-4" /> Gerador de Documento Personalizado</CardTitle>
+              <CardDescription>Crie ofícios, petições e documentos personalizados com todos os dados necessários</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1"><Label className="text-xs font-semibold">Nome Completo do Requerente</Label><Input placeholder="Nome completo" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">CPF do Requerente</Label><Input placeholder="000.000.000-00" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Nome do Advogado(a)</Label><Input placeholder="Dr./Dra. Nome Completo" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">OAB do Advogado</Label><Input placeholder="OAB/SP 000.000" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Comarca</Label><Input placeholder="Ex: São Paulo/SP" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Vara</Label><Input placeholder="Ex: 2ª Vara de Família" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Nº do Processo</Label><Input placeholder="0000000-00.0000.0.00.0000" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Nº do Ofício</Label><Input placeholder="Ofício nº 000/2026" /></div>
+              </div>
+
+              <Separator />
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1"><Label className="text-xs font-semibold">Nome do Juiz(a)</Label><Input placeholder="Exmo(a). Dr(a)." /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Nome do Perito Nomeado</Label><Input placeholder="Nome do perito" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">CRBio / CRF do Perito</Label><Input placeholder="Registro profissional" /></div>
+                <div className="space-y-1"><Label className="text-xs font-semibold">Laboratório</Label><Input placeholder="Nome do laboratório" /></div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Tipo de Documento</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Selecione o tipo" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="oficio_perito">Ofício de Cadastro de Perito</SelectItem>
+                    <SelectItem value="oficio_resultado">Ofício de Encaminhamento de Resultado</SelectItem>
+                    <SelectItem value="peticao_dna">Petição para Exame de DNA</SelectItem>
+                    <SelectItem value="peticao_ipm">Petição para Exumação (IPM)</SelectItem>
+                    <SelectItem value="certidao_coleta">Certidão de Coleta</SelectItem>
+                    <SelectItem value="declaracao_perito">Declaração do Perito</SelectItem>
+                    <SelectItem value="intimacao">Intimação para Coleta</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold">Observações / Corpo do Documento</Label>
+                <textarea className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[120px]" placeholder="Texto adicional ou corpo do documento..." />
+              </div>
+
+              <div className="flex gap-2">
+                <Button className="flex-1" onClick={() => toast.success("Documento personalizado gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar Documento</Button>
+                <Button variant="outline" onClick={() => toast.success("PDF baixado!")}><Download className="mr-1 h-4 w-4" /> Baixar PDF</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
