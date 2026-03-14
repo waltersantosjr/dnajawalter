@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "./pages/Login";
+import PortalCredenciado from "./pages/PortalCredenciado";
 import Dashboard from "./pages/Dashboard";
 import DNAja from "./pages/DNAja";
 import NovoExame from "./pages/NovoExame";
@@ -21,7 +22,6 @@ import AcompanhamentoExames from "./pages/AcompanhamentoExames";
 import JornadaDNA from "./pages/JornadaDNA";
 import IPM from "./pages/IPM";
 import GeradorEtiquetas from "./pages/GeradorEtiquetas";
-import PortalCredenciado from "./pages/PortalCredenciado";
 import Profissionais from "./pages/Profissionais";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +36,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/portal" element={<PortalCredenciado />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/dnaja" element={<DNAja />} />
@@ -52,7 +53,6 @@ const App = () => (
               <Route path="/configuracoes" element={<Configuracoes />} />
               <Route path="/ipm" element={<IPM />} />
               <Route path="/etiquetas" element={<GeradorEtiquetas />} />
-              <Route path="/portal" element={<PortalCredenciado />} />
               <Route path="/profissionais" element={<Profissionais />} />
             </Route>
             <Route path="*" element={<NotFound />} />

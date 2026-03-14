@@ -23,7 +23,7 @@ const Login = () => {
   const handleVerify = () => {
     if (otp.length === 6) {
       verify2FA(otp);
-      navigate("/");
+      navigate("/portal");
     }
   };
 
