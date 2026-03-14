@@ -110,6 +110,7 @@ const SimuladorPrecos = () => {
   const [valorKit, setValorKit] = useState("");
   const [valorVendaCustom, setValorVendaCustom] = useState("");
   const [faturamentoAnual, setFaturamentoAnual] = useState("360000");
+  const [comissao, setComissao] = useState("");
 
   // Etiqueta generator
   const [etiquetaPrefix, setEtiquetaPrefix] = useState("DNA");
