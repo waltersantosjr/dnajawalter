@@ -302,15 +302,28 @@ const Simulador = () => {
             ))}
 
             {/* Add more investigados */}
-            <div className="pt-2 border-t border-dashed border-primary/20">
-              <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar parente do SP:</p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado("Irmão 2", "M")}>
-                  <Plus className="mr-1 h-3 w-3" /> Irmão ♂
-                </Button>
-                <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado("Irmã 2", "F")}>
-                  <Plus className="mr-1 h-3 w-3" /> Irmã ♀
-                </Button>
+            <div className="pt-2 border-t border-dashed border-primary/20 space-y-3">
+              <div>
+                <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar Irmão/Irmã do Suposto Pai:</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado(`Irmão ${investigados.filter(m => m.custom && m.label.startsWith("Irmão")).length + 2}`, "M")}>
+                    <Plus className="mr-1 h-3 w-3" /> Irmão ♂
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado(`Irmã ${investigados.filter(m => m.custom && m.label.startsWith("Irmã")).length + 2}`, "F")}>
+                    <Plus className="mr-1 h-3 w-3" /> Irmã ♀
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar Filho(a) Legítimo do Suposto Pai:</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" className="border-amber-500/40 text-amber-600 hover:bg-amber-50 flex-1" onClick={() => addInvestigado(`Filho Legítimo ${investigados.filter(m => m.custom && m.label.startsWith("Filho Legítimo")).length + 2}`, "M")}>
+                    <Plus className="mr-1 h-3 w-3" /> Filho Legítimo ♂
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-amber-500/40 text-amber-600 hover:bg-amber-50 flex-1" onClick={() => addInvestigado(`Filha Legítima ${investigados.filter(m => m.custom && m.label.startsWith("Filha Legítima")).length + 2}`, "F")}>
+                    <Plus className="mr-1 h-3 w-3" /> Filha Legítima ♀
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
