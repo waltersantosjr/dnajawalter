@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import {
+import { Navigate } from "react-router-dom";
   Building2, ShoppingCart, Scale, Briefcase, Stethoscope,
   ChevronRight, Dna,
 } from "lucide-react";
