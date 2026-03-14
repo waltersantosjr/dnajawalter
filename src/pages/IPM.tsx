@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Skull, FileText, Scale, AlertTriangle, CheckCircle2, Info,
+  Search, FileText, Scale, AlertTriangle, CheckCircle2, Info,
   Printer, Download, DollarSign, Users, ClipboardList, ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
