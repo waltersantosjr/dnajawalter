@@ -14,7 +14,7 @@ import { toast } from "sonner";
 const ETAPAS_IPM = [
   { titulo: "Autorização Judicial", desc: "É necessária ordem judicial para exumação. O juiz nomeia perito e define data.", icon: Scale },
   { titulo: "Comunicação ao IML", desc: "O Instituto Médico Legal (IML) é notificado e designa equipe para auxiliar na exumação.", icon: ClipboardList },
-  { titulo: "Exumação do Corpo", desc: "Equipe pericial realiza a exumação sob supervisão judicial. Material coletado: fêmur ou 5 dentes sem restauração.", icon: Skull },
+  { titulo: "Exumação do Corpo", desc: "Equipe pericial realiza a exumação sob supervisão judicial. Material coletado: fêmur ou 5 dentes sem restauração.", icon: Search },
   { titulo: "Coleta de Material Genético", desc: "O perito extrai DNA do material ósseo ou dental. Processo de extração leva 5-10 dias.", icon: Users },
   { titulo: "Análise Laboratorial", desc: "DNA extraído é comparado com material dos investigantes. Prazo: 20-30 dias úteis.", icon: FileText },
   { titulo: "Laudo Pericial", desc: "Perito emite laudo e envia ao juízo competente com resultado da análise.", icon: CheckCircle2 },
