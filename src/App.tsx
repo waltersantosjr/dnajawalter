@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/auditoria" element={<Auditoria />} />
               <Route path="/jornada-dna" element={<JornadaDNA />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/ipm" element={<IPM />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
