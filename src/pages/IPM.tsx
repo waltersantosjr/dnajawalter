@@ -37,7 +37,7 @@ const IPM = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Skull className="h-7 w-7 text-destructive" /> IPM — Investigação Post Mortem
+          <Search className="h-7 w-7 text-destructive" /> IPM — Investigação Post Mortem
         </h1>
         <p className="text-muted-foreground">Para casos sem parentes em 1º grau do suposto pai</p>
       </div>
