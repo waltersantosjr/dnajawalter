@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
   { title: "Dr. DNAW", url: "/jornada-dna", icon: GraduationCap, roles: ["admin", "coletor", "triagem"] },
   { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
+  { title: "Etiquetas", url: "/etiquetas", icon: Barcode, roles: ["admin", "coletor"] },
   { title: "IPM", url: "/ipm", icon: ClipboardList, roles: ["admin", "coletor"] },
   { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
   { title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
