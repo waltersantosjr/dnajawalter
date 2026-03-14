@@ -61,8 +61,6 @@ const PortalCredenciado = () => {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
-
-  return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-3xl space-y-8">
         {/* Header */}
