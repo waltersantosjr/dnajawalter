@@ -1,7 +1,8 @@
 import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
-  Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap } from
+  Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap,
+  Building2, ShieldCheck } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
