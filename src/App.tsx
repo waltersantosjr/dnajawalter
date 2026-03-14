@@ -20,6 +20,9 @@ import CRM from "./pages/CRM";
 import AcompanhamentoExames from "./pages/AcompanhamentoExames";
 import JornadaDNA from "./pages/JornadaDNA";
 import IPM from "./pages/IPM";
+import GeradorEtiquetas from "./pages/GeradorEtiquetas";
+import PortalCredenciado from "./pages/PortalCredenciado";
+import Profissionais from "./pages/Profissionais";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +51,9 @@ const App = () => (
               <Route path="/jornada-dna" element={<JornadaDNA />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
               <Route path="/ipm" element={<IPM />} />
+              <Route path="/etiquetas" element={<GeradorEtiquetas />} />
+              <Route path="/portal" element={<PortalCredenciado />} />
+              <Route path="/profissionais" element={<Profissionais />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
