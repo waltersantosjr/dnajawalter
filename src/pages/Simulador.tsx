@@ -141,165 +141,255 @@ const Simulador = () => {
         </div>
       </Card>
 
-      {/* Family Tree + Status */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        {/* Family Tree Visual */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-5 w-5 text-chart-4" /> Árvore Genealógica
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="relative min-h-[400px] bg-muted/20 rounded-xl p-6">
-              {/* Avós row */}
-              <div className="flex justify-center gap-6 mb-2">
-                {investigados.filter(m => m.id === "pai_sp" || m.id === "mae_sp").map(m => (
-                  <button key={m.id} onClick={() => toggle(m.id)} className={`rounded-xl border-2 p-3 w-24 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 bg-muted/30 text-muted-foreground opacity-60"}`}>
-                    <div className="text-2xl mb-1">{m.sex === "M" ? "👤" : "👤"}</div>
-                    <p className="text-xs font-semibold">{m.label}</p>
-                    {!m.added && <p className="text-[10px] text-muted-foreground mt-1">Clique p/ incluir</p>}
-                  </button>
-                ))}
+      {/* Two-column: Investigantes VS Investigados */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_auto_1fr]">
+        {/* INVESTIGANTES — quem busca a resposta */}
+        <Card className="border-2 border-success/40 overflow-hidden">
+          <div className="bg-success/10 px-4 py-3 border-b border-success/20">
+            <div className="flex items-center gap-2">
+              <Search className="h-5 w-5 text-success" />
+              <div>
+                <p className="font-bold text-success text-sm">INVESTIGANTES</p>
+                <p className="text-[10px] text-muted-foreground">Quem busca a resposta — Mãe + Filho(a)</p>
               </div>
-
-              {/* Connector line */}
-              <div className="flex justify-center"><div className="w-0.5 h-6 bg-border" /></div>
-
-              {/* Sup. Pai row */}
-              <div className="flex justify-center gap-4 mb-2">
-                {/* Siblings left */}
-                <div className="flex gap-2">
-                  {investigados.filter(m => m.id === "irmao" || (m.custom && m.side === "investigado" && m.sex === "M")).map(m => (
-                    <button key={m.id} onClick={() => m.custom ? removeMember(m.id) : toggle(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 opacity-60"}`}>
-                      <div className="text-lg">👤</div>
-                      <p className="text-[10px] font-semibold truncate">{m.label}</p>
-                    </button>
-                  ))}
+            </div>
+          </div>
+          <CardContent className="p-4 space-y-3">
+            {/* Mãe Biológica */}
+            {investigantes.filter(m => m.id === "mae").map(m => (
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-pink-400 bg-pink-50 text-pink-700" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-2xl">💗</span>
+                <div>
+                  <p className="font-semibold text-sm">Mãe Biológica</p>
+                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluída na análise" : "Clique para incluir"}</p>
                 </div>
+                <Badge variant="outline" className="ml-auto text-[10px] border-success text-success">Investigante</Badge>
+              </button>
+            ))}
 
-                {/* Deceased father */}
-                <div className="rounded-xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-3 w-28 text-center">
-                  <div className="text-2xl">👤</div>
-                  <p className="text-xs font-semibold text-muted-foreground">Sup. Pai</p>
-                  <Badge variant="destructive" className="text-[10px] mt-1">Falecido</Badge>
+            {/* Filho(a) Investigante principal */}
+            {investigantes.filter(m => m.id === "filho").map(m => (
+              <div key={m.id} className="w-full rounded-xl border-2 border-success bg-success/10 p-4 flex items-center gap-3">
+                <span className="text-2xl">{filhoSex === "M" ? "👦" : "👧"}</span>
+                <div>
+                  <p className="font-semibold text-sm text-success">Filho(a) Investigante</p>
+                  <p className="text-[10px] text-muted-foreground">Participante principal — {filhoSex === "M" ? "Masculino ♂" : "Feminino ♀"}</p>
                 </div>
-
-                {/* Siblings right */}
-                <div className="flex gap-2">
-                  {investigados.filter(m => m.id === "irma" || (m.custom && m.side === "investigado" && m.sex === "F")).map(m => (
-                    <button key={m.id} onClick={() => m.custom ? removeMember(m.id) : toggle(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 opacity-60"}`}>
-                      <div className="text-lg">👤</div>
-                      <p className="text-[10px] font-semibold truncate">{m.label}</p>
-                    </button>
-                  ))}
-                </div>
+                <Badge className="ml-auto bg-success text-white text-[10px]">Principal</Badge>
               </div>
+            ))}
 
-              {/* Filhos legítimos */}
-              <div className="flex justify-center gap-3 mb-2">
-                {investigados.filter(m => m.id === "filho_leg" || m.id === "filha_leg").map(m => (
-                  <button key={m.id} onClick={() => toggle(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 opacity-60"}`}>
-                    <div className="text-lg">{m.sex === "M" ? "👦" : "👧"}</div>
-                    <p className="text-[10px] font-semibold truncate">{m.label}</p>
-                  </button>
-                ))}
-              </div>
-
-              {/* Connector */}
-              <div className="flex justify-center"><div className="w-0.5 h-6 bg-border" /></div>
-
-              {/* Investigantes row */}
-              <div className="flex justify-center gap-6">
-                {investigantes.filter(m => m.id === "mae").map(m => (
-                  <button key={m.id} onClick={() => toggle(m.id)} className={`rounded-xl border-2 p-3 w-24 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed opacity-60"}`}>
-                    <div className="text-2xl">💗</div>
-                    <p className="text-xs font-semibold">Mãe Bio</p>
-                  </button>
-                ))}
-                {investigantes.filter(m => m.id === "filho").map(m => (
-                  <div key={m.id} className={`rounded-xl border-2 p-3 w-24 text-center ${nodeColor(m)}`}>
-                    <div className="text-2xl">{filhoSex === "M" ? "👦" : "👧"}</div>
-                    <p className="text-xs font-semibold">Filho(a)</p>
-                  </div>
-                ))}
-                {investigantes.filter(m => m.custom).map(m => (
-                  <button key={m.id} onClick={() => removeMember(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${nodeColor(m)}`}>
-                    <div className="text-lg">{m.sex === "M" ? "👦" : "👧"}</div>
-                    <p className="text-[10px] font-semibold truncate">{m.label}</p>
-                  </button>
-                ))}
-              </div>
-
-              {/* Add buttons */}
-              <div className="mt-4 pt-4 border-t border-dashed">
-                <p className="text-xs text-muted-foreground mb-2 font-semibold">Adicionar participantes:</p>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" onClick={() => addInvestigado("Irmão 2", "M")}><Plus className="mr-1 h-3 w-3" /> + Irmão ♂</Button>
-                  <Button variant="outline" size="sm" onClick={() => addInvestigado("Irmã 2", "F")}><Plus className="mr-1 h-3 w-3" /> + Irmã ♀</Button>
-                  <Button variant="outline" size="sm" onClick={() => addInvestigante("Filho(a) 2", filhoSex)}><Plus className="mr-1 h-3 w-3" /> + Filho(a)</Button>
+            {/* Filhos investigantes adicionais */}
+            {investigantes.filter(m => m.custom).map(m => (
+              <div key={m.id} className="w-full rounded-xl border-2 border-success/60 bg-success/5 p-3 flex items-center gap-3">
+                <span className="text-xl">{m.sex === "M" ? "👦" : "👧"}</span>
+                <div>
+                  <p className="font-semibold text-xs">{m.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.sex === "M" ? "Masculino ♂" : "Feminino ♀"}</p>
                 </div>
+                <button onClick={() => removeMember(m.id)} className="ml-auto text-destructive hover:text-destructive/80">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            {/* Add more investigante children */}
+            <div className="pt-2 border-t border-dashed border-success/20">
+              <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar filho(a) investigante:</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 flex-1" onClick={() => addInvestigante(`Filho ${investigantes.filter(m => m.custom).length + 2}`, "M")}>
+                  <Plus className="mr-1 h-3 w-3" /> Filho ♂
+                </Button>
+                <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 flex-1" onClick={() => addInvestigante(`Filha ${investigantes.filter(m => m.custom).length + 2}`, "F")}>
+                  <Plus className="mr-1 h-3 w-3" /> Filha ♀
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Status panel */}
-        <div className="space-y-4">
-          {/* Traffic Light Status */}
-          <Card className={`border-2 ${levelBorder(statusInfo.level)} overflow-hidden`}>
-            <div className={`${levelBg(statusInfo.level)} p-6 text-center`}>
-              <div className={`inline-flex h-24 w-24 items-center justify-center rounded-full ${levelBg(statusInfo.level)} border-4 ${levelBorder(statusInfo.level)}`}>
-                <span className="text-5xl">{statusInfo.level === "green" ? "🟢" : statusInfo.level === "yellow" ? "🟡" : "🔴"}</span>
+        {/* VS Divider */}
+        <div className="hidden lg:flex flex-col items-center justify-center gap-2">
+          <div className="w-0.5 flex-1 bg-border" />
+          <div className="rounded-full bg-muted border-2 border-border px-3 py-2">
+            <span className="text-xs font-bold text-muted-foreground">VS</span>
+          </div>
+          <div className="w-0.5 flex-1 bg-border" />
+        </div>
+        <div className="lg:hidden flex items-center gap-2 py-2">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border">VS</span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* INVESTIGADOS — parentes do suposto pai */}
+        <Card className="border-2 border-primary/40 overflow-hidden">
+          <div className="bg-primary/10 px-4 py-3 border-b border-primary/20">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              <div>
+                <p className="font-bold text-primary text-sm">INVESTIGADOS</p>
+                <p className="text-[10px] text-muted-foreground">Parentes em 1º grau do Suposto Pai (falecido/ausente)</p>
               </div>
-              <p className={`mt-3 font-bold text-lg ${levelColor(statusInfo.level)}`}>{statusInfo.label}</p>
             </div>
-            <CardContent className="p-4 space-y-3">
-              <p className="text-sm text-muted-foreground">{statusInfo.desc}</p>
-              
-              {/* Suggestion to go green */}
-              {statusInfo.level !== "green" && (
-                <div className="rounded-lg border border-success/30 bg-success/5 p-3">
-                  <p className="text-xs font-bold text-success mb-1">💡 Como tornar Verde:</p>
-                  <p className="text-xs text-muted-foreground">{statusInfo.suggestion}</p>
+          </div>
+          <CardContent className="p-4 space-y-3">
+            {/* Suposto Pai (falecido) */}
+            <div className="w-full rounded-xl border-2 border-dashed border-muted-foreground/40 bg-muted/30 p-4 flex items-center gap-3">
+              <span className="text-2xl">👤</span>
+              <div>
+                <p className="font-semibold text-sm text-muted-foreground">Suposto Pai</p>
+                <p className="text-[10px] text-muted-foreground">DNA será reconstituído pelos parentes abaixo</p>
+              </div>
+              <Badge variant="destructive" className="ml-auto text-[10px]">Falecido / Ausente</Badge>
+            </div>
+
+            <Separator className="my-1" />
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Avós Paternos</p>
+
+            {/* Avós */}
+            {investigados.filter(m => m.id === "pai_sp" || m.id === "mae_sp").map(m => (
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-amber-400 bg-amber-50 text-amber-700" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-xl">{m.sex === "M" ? "👴" : "👵"}</span>
+                <div>
+                  <p className="font-semibold text-xs">{m.role}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
                 </div>
-              )}
+                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-[10px] text-success font-bold">✓ mesmo sexo</span>}
+              </button>
+            ))}
+
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mt-2">Irmãos do Suposto Pai</p>
+
+            {/* Irmãos */}
+            {investigados.filter(m => m.id === "irmao" || m.id === "irma").map(m => (
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-primary bg-primary/10 text-primary" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-xl">{m.sex === "M" ? "👨" : "👩"}</span>
+                <div>
+                  <p className="font-semibold text-xs">{m.role}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
+                </div>
+                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-[10px] text-success font-bold">✓ mesmo sexo</span>}
+              </button>
+            ))}
+
+            {/* Custom investigados */}
+            {investigados.filter(m => m.custom).map(m => (
+              <div key={m.id} className="w-full rounded-xl border-2 border-primary/60 bg-primary/5 p-3 flex items-center gap-3">
+                <span className="text-xl">{m.sex === "M" ? "👨" : "👩"}</span>
+                <div>
+                  <p className="font-semibold text-xs">{m.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.sex === "M" ? "♂" : "♀"} — Parente do SP</p>
+                </div>
+                <button onClick={() => removeMember(m.id)} className="ml-auto text-destructive hover:text-destructive/80">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mt-2">Filhos Legítimos do SP</p>
+
+            {/* Filhos legítimos */}
+            {investigados.filter(m => m.id === "filho_leg" || m.id === "filha_leg").map(m => (
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-primary bg-primary/10 text-primary" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-xl">{m.sex === "M" ? "👦" : "👧"}</span>
+                <div>
+                  <p className="font-semibold text-xs">{m.role}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
+                </div>
+                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-[10px] text-success font-bold">✓ mesmo sexo</span>}
+              </button>
+            ))}
+
+            {/* Add more investigados */}
+            <div className="pt-2 border-t border-dashed border-primary/20">
+              <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar parente do SP:</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado("Irmão 2", "M")}>
+                  <Plus className="mr-1 h-3 w-3" /> Irmão ♂
+                </Button>
+                <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado("Irmã 2", "F")}>
+                  <Plus className="mr-1 h-3 w-3" /> Irmã ♀
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Status + Selected + Action row */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Traffic Light Status */}
+        <Card className={`border-2 ${levelBorder(statusInfo.level)} overflow-hidden`}>
+          <div className={`${levelBg(statusInfo.level)} p-5 text-center`}>
+            <span className="text-5xl">{statusInfo.level === "green" ? "🟢" : statusInfo.level === "yellow" ? "🟡" : "🔴"}</span>
+            <p className={`mt-2 font-bold ${levelColor(statusInfo.level)}`}>{statusInfo.label}</p>
+          </div>
+          <CardContent className="p-4 space-y-2">
+            <p className="text-xs text-muted-foreground">{statusInfo.desc}</p>
+            {statusInfo.level !== "green" && (
+              <div className="rounded-lg border border-success/30 bg-success/5 p-2">
+                <p className="text-[10px] font-bold text-success mb-1">💡 Como tornar Verde:</p>
+                <p className="text-[10px] text-muted-foreground">{statusInfo.suggestion}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Selected members summary */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Participantes Selecionados</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {addedInvestigantes.length > 0 && (
+              <p className="text-[10px] font-bold text-success uppercase tracking-wide">Investigantes</p>
+            )}
+            {addedInvestigantes.map(m => (
+              <div key={m.id} className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-success" />
+                  {m.label} ({m.sex === "M" ? "♂" : "♀"})
+                </span>
+                <Badge variant="outline" className="text-[9px] border-success text-success px-1">Investigante</Badge>
+              </div>
+            ))}
+            {addedInvestigados.length > 0 && (
+              <p className="text-[10px] font-bold text-primary uppercase tracking-wide mt-2">Investigados</p>
+            )}
+            {addedInvestigados.map(m => (
+              <div key={m.id} className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5">
+                  <div className={`h-2 w-2 rounded-full ${m.sex === filhoSexValue ? "bg-success" : "bg-primary"}`} />
+                  {m.label} ({m.sex === "M" ? "♂" : "♀"})
+                  {m.sex === filhoSexValue && <span className="text-[9px] text-success">✓</span>}
+                </span>
+                <Badge variant="outline" className="text-[9px] border-primary text-primary px-1">Investigado</Badge>
+              </div>
+            ))}
+            {addedInvestigados.length === 0 && <p className="text-[10px] text-muted-foreground text-center py-2">Selecione parentes do SP ao lado</p>}
+          </CardContent>
+        </Card>
+
+        {/* Action */}
+        <div className="flex flex-col justify-between gap-3">
+          <Card className="flex-1">
+            <CardContent className="p-4 space-y-2">
+              <p className="text-xs font-semibold">Resumo</p>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Investigantes:</span>
+                <span className="font-bold text-success">{addedInvestigantes.length}</span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Investigados:</span>
+                <span className="font-bold text-primary">{addedInvestigados.length}</span>
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Total participantes:</span>
+                <span className="font-bold">{addedInvestigantes.length + addedInvestigados.length}</span>
+              </div>
             </CardContent>
           </Card>
-
-          {/* Selected members */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Parentes Selecionados</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {addedInvestigantes.map(m => (
-                <div key={m.id} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-success" />
-                    {m.label} ({m.sex === "M" ? "♂" : "♀"})
-                  </span>
-                  <Badge variant="outline" className="text-[10px] border-success text-success">Investigante</Badge>
-                </div>
-              ))}
-              {addedInvestigados.map(m => {
-                const isSameSex = m.sex === filhoSexValue;
-                return (
-                  <div key={m.id} className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${isSameSex ? "bg-success" : "bg-primary"}`} />
-                      {m.label} ({m.sex === "M" ? "♂" : "♀"})
-                      {isSameSex && <span className="text-[10px] text-success">✓ mesmo sexo</span>}
-                    </span>
-                    <span className="text-xs text-chart-4 font-mono">+{m.weight}%</span>
-                  </div>
-                );
-              })}
-              {addedInvestigados.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">Clique nos nós da árvore para incluir</p>}
-            </CardContent>
-          </Card>
-
-          {/* Open Ficha */}
           <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={() => setShowFicha(true)}>
             <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro
           </Button>
