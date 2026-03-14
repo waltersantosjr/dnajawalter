@@ -19,6 +19,7 @@ import Configuracoes from "./pages/Configuracoes";
 import CRM from "./pages/CRM";
 import AcompanhamentoExames from "./pages/AcompanhamentoExames";
 import JornadaDNA from "./pages/JornadaDNA";
+import IPM from "./pages/IPM";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
