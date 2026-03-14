@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  Barcode, AlertTriangle, CheckCircle2, Package, Receipt, DollarSign,
+  Dna, AlertTriangle, CheckCircle2, Package, Receipt, DollarSign,
   Home, Building2, ShoppingCart, Plus, Trash2, Tag, Printer,
-  CreditCard, Banknote, Smartphone, CircleDot, Ticket, X,
+  CreditCard, Banknote, Smartphone, CircleDot, Ticket, X, Barcode,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,23 +26,22 @@ interface CartItem {
   date: string;
 }
 
-const NF_LABELS: Record<string, string> = {
-  produto: "NF Produto",
-  servico: "NF Serviço",
-  ecommerce: "NF E-commerce",
-};
-
-const NF_DESC: Record<string, string> = {
-  produto: "Nota Fiscal de Produto (ICMS)",
-  servico: "Nota Fiscal de Serviço (ISS)",
-  ecommerce: "Venda online / marketplace",
-};
+const NF_LABELS: Record<string, string> = { produto: "NF Produto", servico: "NF Serviço", ecommerce: "NF E-commerce" };
+const NF_DESC: Record<string, string> = { produto: "Nota Fiscal de Produto (ICMS)", servico: "Nota Fiscal de Serviço (ISS)", ecommerce: "Venda online / marketplace" };
 
 const PAGAMENTO_OPTIONS: { id: Pagamento; label: string; icon: React.ElementType }[] = [
   { id: "dinheiro", label: "Dinheiro", icon: Banknote },
   { id: "credito", label: "Crédito", icon: CreditCard },
   { id: "debito", label: "Débito", icon: CreditCard },
   { id: "pix", label: "PIX", icon: Smartphone },
+];
+
+const LABS_CREDENCIADOS = [
+  { nome: "DNAjá Lab — São Paulo/SP", cidade: "São Paulo", telefone: "(11) 3333-4444" },
+  { nome: "DNAjá Lab — Campinas/SP", cidade: "Campinas", telefone: "(19) 3222-5555" },
+  { nome: "DNAjá Lab — Ribeirão Preto/SP", cidade: "Ribeirão Preto", telefone: "(16) 3111-6666" },
+  { nome: "BioGenetics — Uberlândia/MG", cidade: "Uberlândia", telefone: "(34) 3253-4100" },
+  { nome: "DNAjá Lab — Rio de Janeiro/RJ", cidade: "Rio de Janeiro", telefone: "(21) 3444-7777" },
 ];
 
 const DNAja = () => {
@@ -55,36 +54,35 @@ const DNAja = () => {
   const [pagamento, setPagamento] = useState<Pagamento | "">("");
   const [desconto, setDesconto] = useState("0,00");
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [cidadeCliente, setCidadeCliente] = useState("");
   const [sales, setSales] = useState<{ barcode: string; etiqueta: string; status: string }[]>([
     { barcode: "1111111111111", etiqueta: "TRK-IHEV6CIL", status: "vendido" },
   ]);
-  const [showVoucher, setShowVoucher] = useState<CartItem | null>(null);
+  const [showVoucher, setShowVoucher] = useState<{ item: CartItem; lab: typeof LABS_CREDENCIADOS[0] } | null>(null);
 
   const parseBRL = (v: string) => parseFloat(v.replace(",", ".")) || 0;
 
   const addToCart = () => {
     if (!barcode.trim()) { toast.error("Digite ou bipe o código de barras"); return; }
     const item: CartItem = {
-      id: Date.now().toString(),
-      barcode,
-      etiqueta,
-      kitPrice: parseBRL(kitPrice),
-      salePrice: parseBRL(salePrice),
-      modalidade,
-      date: new Date().toLocaleDateString("pt-BR"),
+      id: Date.now().toString(), barcode, etiqueta, kitPrice: parseBRL(kitPrice),
+      salePrice: parseBRL(salePrice), modalidade, date: new Date().toLocaleDateString("pt-BR"),
     };
     setCart([...cart, item]);
-    setBarcode("");
-    setEtiqueta("");
+    setBarcode(""); setEtiqueta("");
     toast.success("Kit adicionado ao carrinho");
   };
 
   const removeFromCart = (id: string) => setCart(cart.filter(c => c.id !== id));
-
   const subtotal = cart.reduce((a, c) => a + c.salePrice, 0);
   const custoTotal = cart.reduce((a, c) => a + c.kitPrice, 0);
   const descontoVal = parseBRL(desconto);
   const total = Math.max(subtotal - descontoVal, 0);
+
+  const findNearestLab = (cidade: string) => {
+    const match = LABS_CREDENCIADOS.find(l => l.cidade.toLowerCase() === cidade.toLowerCase());
+    return match || LABS_CREDENCIADOS[0];
+  };
 
   const finalizarVenda = () => {
     if (cart.length === 0) { toast.error("Adicione kits ao carrinho"); return; }
@@ -99,9 +97,9 @@ const DNAja = () => {
     toast.success(`Venda finalizada! ${cart.length} kit(s) · R$ ${total.toFixed(2)}`);
 
     if (presenciais.length > 0) {
-      setShowVoucher(presenciais[0]);
+      const lab = findNearestLab(cidadeCliente);
+      setShowVoucher({ item: presenciais[0], lab });
     }
-
     setCart([]);
   };
 
@@ -126,30 +124,40 @@ const DNAja = () => {
               <Separator />
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <div><p className="text-xs text-muted-foreground">Código de Barras</p><p className="font-mono font-bold">{showVoucher.barcode}</p></div>
-              <div><p className="text-xs text-muted-foreground">Etiqueta DNA</p><p className="font-mono font-bold">{showVoucher.etiqueta || "—"}</p></div>
-              <div><p className="text-xs text-muted-foreground">Data de Emissão</p><p className="font-bold">{showVoucher.date}</p></div>
+              <div><p className="text-xs text-muted-foreground">Código de Barras</p><p className="font-mono font-bold">{showVoucher.item.barcode}</p></div>
+              <div><p className="text-xs text-muted-foreground">Etiqueta DNA</p><p className="font-mono font-bold">{showVoucher.item.etiqueta || "—"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Data de Emissão</p><p className="font-bold">{showVoucher.item.date}</p></div>
               <div><p className="text-xs text-muted-foreground">Validade</p><p className="font-bold text-warning">30 dias</p></div>
             </div>
             <Separator />
+
+            {/* Lab credenciado */}
+            <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 space-y-2">
+              <p className="font-bold text-primary text-sm">🏥 Laboratório Credenciado Indicado</p>
+              <p className="font-semibold">{showVoucher.lab.nome}</p>
+              <p className="text-sm text-muted-foreground">📞 {showVoucher.lab.telefone}</p>
+              <p className="text-xs text-muted-foreground">Apresente este voucher no balcão de atendimento.</p>
+            </div>
+
             <div className="rounded-lg bg-success/10 p-4 space-y-2">
               <p className="font-bold text-success text-sm">📍 Instruções para o Cliente</p>
               <ol className="text-xs text-muted-foreground space-y-1 list-decimal pl-4">
-                <li>Apresente este voucher em qualquer laboratório credenciado DNAjá®</li>
+                <li>Apresente este voucher no laboratório credenciado indicado acima</li>
                 <li>Leve documento com foto (RG ou CNH) de todos os participantes</li>
                 <li>A coleta é indolor — feita por swab bucal (cotonete na bochecha)</li>
                 <li>O resultado será enviado em até 5 dias úteis</li>
               </ol>
             </div>
+
             <div className="rounded-lg border-2 border-dashed border-muted-foreground/30 p-4 space-y-2">
-              <p className="text-xs font-bold text-center text-muted-foreground">LABORATÓRIOS CREDENCIADOS</p>
+              <p className="text-xs font-bold text-center text-muted-foreground">OUTROS LABORATÓRIOS CREDENCIADOS</p>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p>• DNAjá — São Paulo/SP</p>
-                <p>• DNAjá — Campinas/SP</p>
-                <p>• DNAjá — Ribeirão Preto/SP</p>
-                <p>• BioGenetics — Uberlândia/MG</p>
+                {LABS_CREDENCIADOS.filter(l => l.nome !== showVoucher.lab.nome).map(l => (
+                  <p key={l.nome}>• {l.nome} — {l.telefone}</p>
+                ))}
               </div>
             </div>
+
             <div className="rounded-lg bg-warning/10 p-3 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
               <p className="text-xs text-warning font-semibold">SEM VALIDADE JUDICIAL — Kit apenas informativo (Peace of Mind)</p>
@@ -162,10 +170,11 @@ const DNAja = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header with DNA icon */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Package className="h-7 w-7 text-warning" />
+            <Dna className="h-7 w-7 text-warning" />
             DNAjá PDV - Ponto de Venda
           </h1>
           <p className="text-muted-foreground">Registro de venda de kits de auto coleta</p>
@@ -186,25 +195,27 @@ const DNAja = () => {
             </p>
           </div>
 
-          {/* Add Kit Card */}
-          <Card className="border-success/30 overflow-hidden">
-            <div className="bg-gradient-to-r from-success to-success/80 px-5 py-4 text-white">
+          {/* Add Kit Card - redesigned per reference image */}
+          <Card className="overflow-hidden">
+            <div className="bg-gradient-to-r from-[hsl(var(--success))] to-[hsl(var(--success)/0.7)] px-6 py-5 text-white">
               <div className="flex items-center gap-3">
-                <ShoppingCart className="h-6 w-6" />
+                <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Dna className="h-7 w-7" />
+                </div>
                 <div>
-                  <p className="font-bold text-lg">Adicionar Kit ao Carrinho</p>
-                  <p className="text-sm opacity-90">Bipe ou digite os dados do kit</p>
+                  <p className="font-bold text-xl">DNAjá - Venda Rápida</p>
+                  <p className="text-sm opacity-90">Registre a venda do kit de auto coleta</p>
                 </div>
               </div>
             </div>
-            <CardContent className="p-5 space-y-4">
+            <CardContent className="p-6 space-y-5">
               {/* Modalidade */}
               <div>
-                <p className="font-bold text-sm mb-2">Modalidade</p>
+                <p className="font-bold text-sm mb-3">Modalidade</p>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setModalidade("auto_coleta")}
-                    className={`rounded-xl border-2 p-3 text-left transition-all ${modalidade === "auto_coleta" ? "border-success bg-success/5 shadow-sm" : "border-border hover:border-muted-foreground/30"}`}
+                    className={`rounded-xl border-2 p-4 text-left transition-all ${modalidade === "auto_coleta" ? "border-success bg-success/5 shadow-sm" : "border-border hover:border-muted-foreground/30"}`}
                   >
                     <Home className={`h-5 w-5 mb-1 ${modalidade === "auto_coleta" ? "text-success" : "text-muted-foreground"}`} />
                     <p className="font-semibold text-sm">Auto Coleta</p>
@@ -212,41 +223,57 @@ const DNAja = () => {
                   </button>
                   <button
                     onClick={() => setModalidade("presencial")}
-                    className={`rounded-xl border-2 p-3 text-left transition-all ${modalidade === "presencial" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-muted-foreground/30"}`}
+                    className={`rounded-xl border-2 p-4 text-left transition-all ${modalidade === "presencial" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-muted-foreground/30"}`}
                   >
                     <Building2 className={`h-5 w-5 mb-1 ${modalidade === "presencial" ? "text-primary" : "text-muted-foreground"}`} />
                     <p className="font-semibold text-sm">Coleta Presencial</p>
-                    <p className="text-xs text-muted-foreground">Coleta no laboratório</p>
+                    <p className="text-xs text-muted-foreground">Coleta realizada no lab</p>
                   </button>
                 </div>
               </div>
 
-              {/* Barcode + Etiqueta */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-sm font-semibold flex items-center gap-1">
-                    <Barcode className="h-4 w-4 text-muted-foreground" /> Cód. de Barras *
-                  </Label>
-                  <Input
-                    value={barcode}
-                    onChange={(e) => setBarcode(e.target.value)}
-                    className="font-mono"
-                    placeholder="DNA-2026-XXXXX"
-                    autoFocus
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-sm font-semibold flex items-center gap-1">
-                    <Tag className="h-4 w-4 text-muted-foreground" /> Etiqueta DNA
-                  </Label>
-                  <Input
-                    value={etiqueta}
-                    onChange={(e) => setEtiqueta(e.target.value)}
-                    className="font-mono"
-                    placeholder="DNA0011"
-                  />
-                </div>
+              {/* Barcode */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold flex items-center gap-1">
+                  <Barcode className="h-4 w-4 text-muted-foreground" /> Código de Barras do Kit *
+                </Label>
+                <Input
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  className="font-mono h-12 text-base border-2 border-success/50 focus:border-success"
+                  placeholder="Bipe ou digite o código..."
+                  autoFocus
+                />
+                <p className="text-xs text-muted-foreground">Use o leitor de código de barras ou digite manualmente</p>
               </div>
+
+              {/* Etiqueta */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold flex items-center gap-1">
+                  <Tag className="h-4 w-4 text-muted-foreground" /> Código da Etiqueta DNA
+                </Label>
+                <Input
+                  value={etiqueta}
+                  onChange={(e) => setEtiqueta(e.target.value)}
+                  className="font-mono"
+                  placeholder="Ex: DNA0011"
+                />
+              </div>
+
+              {/* Cidade (for presencial) */}
+              {modalidade === "presencial" && (
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-bold flex items-center gap-1">
+                    📍 Cidade do Cliente
+                  </Label>
+                  <Input
+                    value={cidadeCliente}
+                    onChange={(e) => setCidadeCliente(e.target.value)}
+                    placeholder="Ex: São Paulo"
+                  />
+                  <p className="text-xs text-muted-foreground">O voucher indicará o laboratório credenciado mais próximo</p>
+                </div>
+              )}
 
               {/* Prices */}
               <div className="grid grid-cols-2 gap-3">
@@ -261,7 +288,7 @@ const DNAja = () => {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-sm font-semibold flex items-center gap-1">
-                    <DollarSign className="h-4 w-4 text-success" /> Valor de Venda (cliente)
+                    <DollarSign className="h-4 w-4 text-success" /> Valor de Venda
                   </Label>
                   <div className="flex items-center gap-1">
                     <span className="text-sm text-muted-foreground">R$</span>
@@ -270,8 +297,8 @@ const DNAja = () => {
                 </div>
               </div>
 
-              <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={addToCart}>
-                <Plus className="mr-2 h-5 w-5" /> Adicionar ao Carrinho
+              <Button className="w-full h-12 bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white text-base" onClick={addToCart}>
+                <CheckCircle2 className="mr-2 h-5 w-5" /> Registrar Venda
               </Button>
             </CardContent>
           </Card>
@@ -305,20 +332,13 @@ const DNAja = () => {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-4">
-          {/* Nota Fiscal */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-muted-foreground" /> Nota Fiscal
-              </CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" /> Nota Fiscal</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {(["produto", "servico", "ecommerce"] as NfType[]).map(nf => (
-                <button
-                  key={nf}
-                  onClick={() => setNfType(nf)}
-                  className={`w-full rounded-lg border-2 p-3 text-left transition-all ${nfType === nf ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}
-                >
+                <button key={nf} onClick={() => setNfType(nf)} className={`w-full rounded-lg border-2 p-3 text-left transition-all ${nfType === nf ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}>
                   <p className="font-semibold text-sm">{NF_LABELS[nf]}</p>
                   <p className="text-xs text-muted-foreground">{NF_DESC[nf]}</p>
                 </button>
@@ -326,21 +346,14 @@ const DNAja = () => {
             </CardContent>
           </Card>
 
-          {/* Pagamento */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-muted-foreground" /> Pagamento
-              </CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4 text-muted-foreground" /> Pagamento</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
                 {PAGAMENTO_OPTIONS.map(op => (
-                  <button
-                    key={op.id}
-                    onClick={() => setPagamento(op.id)}
-                    className={`rounded-lg border-2 p-3 flex flex-col items-center gap-1.5 transition-all ${pagamento === op.id ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}
-                  >
+                  <button key={op.id} onClick={() => setPagamento(op.id)} className={`rounded-lg border-2 p-3 flex flex-col items-center gap-1.5 transition-all ${pagamento === op.id ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"}`}>
                     <op.icon className={`h-5 w-5 ${pagamento === op.id ? "text-primary" : "text-muted-foreground"}`} />
                     <span className="text-xs font-semibold">{op.label}</span>
                   </button>
@@ -349,12 +362,9 @@ const DNAja = () => {
             </CardContent>
           </Card>
 
-          {/* Resumo */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Receipt className="h-4 w-4 text-muted-foreground" /> Resumo da Venda
-              </CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Receipt className="h-4 w-4 text-muted-foreground" /> Resumo da Venda</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {cart.length > 0 && (
@@ -377,14 +387,8 @@ const DNAja = () => {
               )}
               <Separator />
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal ({cart.length} kits)</span>
-                  <span className="font-mono">R$ {subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Custo total</span>
-                  <span className="font-mono text-muted-foreground">R$ {custoTotal.toFixed(2)}</span>
-                </div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Subtotal ({cart.length} kits)</span><span className="font-mono">R$ {subtotal.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Custo total</span><span className="font-mono text-muted-foreground">R$ {custoTotal.toFixed(2)}</span></div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Desconto R$</span>
                   <Input value={desconto} onChange={e => setDesconto(e.target.value)} className="w-24 h-7 text-xs font-mono text-right" />
@@ -395,17 +399,10 @@ const DNAja = () => {
                 <span className="text-lg font-bold">Total a Pagar</span>
                 <span className="text-2xl font-bold text-success font-mono">R$ {total.toFixed(2)}</span>
               </div>
-              <Button
-                className="w-full bg-success hover:bg-success/90 text-white"
-                size="lg"
-                disabled={cart.length === 0}
-                onClick={finalizarVenda}
-              >
+              <Button className="w-full bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white" size="lg" disabled={cart.length === 0} onClick={finalizarVenda}>
                 <CheckCircle2 className="mr-2 h-5 w-5" /> Finalizar Venda
               </Button>
-              {cart.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center">Adicione kits ao carrinho para finalizar.</p>
-              )}
+              {cart.length === 0 && <p className="text-xs text-muted-foreground text-center">Adicione kits ao carrinho para finalizar.</p>}
             </CardContent>
           </Card>
         </div>

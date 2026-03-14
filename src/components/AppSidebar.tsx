@@ -1,7 +1,7 @@
 import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
-  Calculator, Receipt, Briefcase, Microscope, Route, Users } from
+  Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -15,17 +15,17 @@ import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "coletor", "triagem"] },
-  { title: "DNAjá", url: "/dnaja", icon: Barcode, roles: ["admin", "triagem"] },
+  { title: "DNAjá", url: "/dnaja", icon: Dna, roles: ["admin", "triagem"] },
   { title: "Duo ou Trio", url: "/exames/novo", icon: Users, roles: ["admin", "coletor"] },
   { title: "Reconstituição", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
   { title: "Exames Cadastrados", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
   { title: "Acompanhamento", url: "/acompanhamento", icon: Microscope, roles: ["admin", "coletor", "triagem"] },
   { title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
-  { title: "Jornada do DNA", url: "/jornada-dna", icon: Route, roles: ["admin", "coletor", "triagem"] },
+  { title: "Dr. DNAW", url: "/jornada-dna", icon: GraduationCap, roles: ["admin", "coletor", "triagem"] },
   { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
+  { title: "IPM", url: "/ipm", icon: ClipboardList, roles: ["admin", "coletor"] },
   { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
   { title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
-  { title: "Auditoria", url: "/auditoria", icon: ClipboardList, roles: ["admin"] },
   { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] },
 ];
 
@@ -37,11 +37,11 @@ const ICON_COLORS: Record<string, string> = {
   "Exames Cadastrados": "text-info",
   Acompanhamento: "text-info",
   Documentos: "text-primary",
-  "Jornada do DNA": "text-chart-4",
+  "Dr. DNAW": "text-chart-3",
   "Calculadora DNAjá": "text-success",
+  "IPM": "text-destructive",
   "CRM Comercial": "text-chart-3",
   Tendências: "text-chart-3",
-  Auditoria: "text-muted-foreground",
   Configurações: "text-muted-foreground",
 };
 
@@ -78,7 +78,7 @@ export function AppSidebar() {
                       className="hover:bg-sidebar-accent hover:translate-x-1 transition-all duration-200"
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-medium shadow-sm"
                     >
-                      <item.icon className={`mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${ICON_COLORS[item.title]}`} />
+                      <item.icon className={`mr-2 h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${ICON_COLORS[item.title] || "text-muted-foreground"}`} />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>

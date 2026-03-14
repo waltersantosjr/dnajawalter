@@ -19,6 +19,7 @@ import Configuracoes from "./pages/Configuracoes";
 import CRM from "./pages/CRM";
 import AcompanhamentoExames from "./pages/AcompanhamentoExames";
 import JornadaDNA from "./pages/JornadaDNA";
+import IPM from "./pages/IPM";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/auditoria" element={<Auditoria />} />
               <Route path="/jornada-dna" element={<JornadaDNA />} />
               <Route path="/configuracoes" element={<Configuracoes />} />
+              <Route path="/ipm" element={<IPM />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

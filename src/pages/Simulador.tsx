@@ -14,7 +14,6 @@ import {
 import { toast } from "sonner";
 import { FichaDNAja } from "@/components/FichaDNAja";
 
-/* ───── Types ───── */
 interface FamilyMember {
   id: string;
   role: string;
@@ -27,95 +26,50 @@ interface FamilyMember {
   custom?: boolean;
 }
 
-interface ProbRow {
-  config: string;
-  prob: string;
-  obs: string;
-  level: "green" | "yellow" | "red";
-}
-
-/* ───── Data ───── */
 const INITIAL_MEMBERS: FamilyMember[] = [
   { id: "mae", role: "Mãe Biológica", label: "Mãe", icon: Heart, added: true, side: "investigante", weight: 25, sex: "F" },
   { id: "filho", role: "Filho(a) Investigante", label: "Filho(a)", icon: Baby, added: true, side: "investigante", weight: 0, sex: "M" },
-  { id: "mae_sp", role: "Mãe do Suposto Pai", label: "Mãe do SP", icon: Heart, added: false, side: "investigado", weight: 20, sex: "F" },
-  { id: "pai_sp", role: "Pai do Suposto Pai", label: "Pai do SP", icon: Crown, added: false, side: "investigado", weight: 20, sex: "M" },
-  { id: "irmao", role: "Irmão do Suposto Pai", label: "Irmão do SP", icon: Users, added: false, side: "investigado", weight: 18, sex: "M" },
-  { id: "irma", role: "Irmã do Suposto Pai", label: "Irmã do SP", icon: Users, added: false, side: "investigado", weight: 16, sex: "F" },
+  { id: "mae_sp", role: "Mãe do Suposto Pai", label: "Avó", icon: Heart, added: false, side: "investigado", weight: 20, sex: "F" },
+  { id: "pai_sp", role: "Pai do Suposto Pai", label: "Avô", icon: Crown, added: false, side: "investigado", weight: 20, sex: "M" },
+  { id: "irmao", role: "Irmão do Suposto Pai", label: "Irmão", icon: Users, added: false, side: "investigado", weight: 18, sex: "M" },
+  { id: "irma", role: "Irmã do Suposto Pai", label: "Irmã", icon: Users, added: false, side: "investigado", weight: 16, sex: "F" },
   { id: "filho_leg", role: "Filho Legítimo do SP", label: "Filho Legítimo", icon: Baby, added: false, side: "investigado", weight: 17, sex: "M" },
   { id: "filha_leg", role: "Filha Legítima do SP", label: "Filha Legítima", icon: Baby, added: false, side: "investigado", weight: 15, sex: "F" },
 ];
 
-const PROB_TABLE: ProbRow[] = [
-  { config: "Mãe + Filho + Avós Paternos (Pai e Mãe do SP)", prob: "99% – 99,99%", obs: "Padrão Ouro (REC4A). Avós possuem carga genética completa do falecido.", level: "green" },
-  { config: "Mãe + Filho + 3 ou mais Irmãos Germanos", prob: "95% – 99%", obs: "Alta robustez estatística; quanto mais irmãos, maior a precisão.", level: "green" },
-  { config: "Mãe + Filho + Avó + 1 Irmão (mesmo sexo do filho)", prob: "95% – 99%", obs: "Cromossomo Y/X compartilhado entre irmão e filho reforça o vínculo.", level: "green" },
-  { config: "Mãe + Filho + 2 Irmãos Germanos (um do mesmo sexo)", prob: "92% – 98%", obs: "Boa configuração. O irmão do mesmo sexo garante comparação X/Y.", level: "green" },
-  { config: "Mãe + Filho + 1 Irmão do mesmo sexo", prob: "85% – 95%", obs: "Zona Cinzenta alta. Cromossomos sexuais auxiliam na conclusão.", level: "yellow" },
-  { config: "Mãe + Filho + 1 Irmão do sexo oposto", prob: "75% – 88%", obs: "Zona Cinzenta. Sem cromossomo sexual compartilhado, risco de inconclusão.", level: "yellow" },
-  { config: "Mãe + Filho + Apenas Filhos Legítimos", prob: "80% – 92%", obs: "Depende do sexo: filho legítimo do mesmo sexo do investigante melhora resultado.", level: "yellow" },
-  { config: "Filho + Irmãos (SEM a Mãe)", prob: "Reduz ~15-20%", obs: "Ausência do DNA materno dificulta triagem. Risco elevado de inconclusão.", level: "red" },
-  { config: "Apenas 1 Progenitor (só Avô ou só Avó)", prob: "60% – 75%", obs: "Risco Elevado. Falta metade da carga genética do suposto pai.", level: "red" },
-  { config: "Nenhum parente do mesmo sexo do investigante", prob: "Reduz ~10-15%", obs: "Regra crítica: sem parente do mesmo sexo, cromossomos sexuais não confirmam linhagem.", level: "red" },
-];
+type StatusLevel = "green" | "yellow" | "red";
 
-const LR_TABLE = [
-  { w: "> 99,99%", interp: "Paternidade praticamente provada", status: "Aceite imediato — padrão judicial brasileiro", level: "green" as const },
-  { w: "99% – 99,99%", interp: "Paternidade muito provável", status: "Geralmente aceito, alto poder probatório", level: "green" as const },
-  { w: "95% – 99%", interp: "Paternidade provável", status: "Aceito com ressalvas; pode sofrer impugnação técnica", level: "yellow" as const },
-  { w: "80% – 95%", interp: "Indícios de paternidade", status: "Zona Cinzenta — requer contraprova ou ampliação de painel (NGS 47+ marcadores)", level: "yellow" as const },
-  { w: "< 80%", interp: "Inconclusivo", status: "Não serve para presunção de vínculo.", level: "red" as const },
-];
-
-const getViabilityInfo = (v: number) => {
-  if (v <= 40) return { color: "text-destructive", bg: "bg-destructive", label: "Inviável", desc: "Não recomendado prosseguir.", prob: "< 80%" };
-  if (v <= 60) return { color: "text-warning", bg: "bg-warning", label: "Zona Cinzenta", desc: "Adicione mais parentes de 1º grau.", prob: "80% – 95%" };
-  if (v <= 80) return { color: "text-chart-4", bg: "bg-chart-4", label: "Viável com Ressalvas", desc: "Pode ser fortalecida.", prob: "95% – 99%" };
-  return { color: "text-success", bg: "bg-success", label: "Alta Viabilidade", desc: "Configuração robusta.", prob: "> 99%" };
+const getStatusInfo = (v: number, hasSameSex: boolean, investigadosCount: number): { level: StatusLevel; label: string; desc: string; suggestion: string } => {
+  if (!hasSameSex && investigadosCount > 0) {
+    return { level: "red", label: "🔴 Configuração Inviável", desc: "Sem parente do mesmo sexo do investigante.", suggestion: "Adicione um parente do mesmo sexo (irmão/irmã, filho/filha legítimo) do suposto pai para comparação cromossômica." };
+  }
+  if (v <= 40) return { level: "red", label: "🔴 Configuração Fraca", desc: "Alto risco de resultado inconclusivo.", suggestion: "Adicione mais parentes de 1º grau. Ideal: ambos os avós paternos (Mãe + Pai do SP) para atingir Padrão Ouro." };
+  if (v <= 60) return { level: "yellow", label: "🟡 Zona Cinzenta", desc: "Pode gerar resultado inconclusivo (80-95%).", suggestion: "Inclua a mãe biológica e mais 1 parente do mesmo sexo do investigante para fortalecer a configuração." };
+  if (v <= 80) return { level: "yellow", label: "🟡 Viável com Ressalvas", desc: "Boa configuração, mas pode ser fortalecida.", suggestion: "Adicione mais 1 parente (irmão, avô ou avó) para elevar a robustez estatística e garantir resultado conclusivo." };
+  return { level: "green", label: "🟢 Alta Viabilidade", desc: "Configuração robusta — alta probabilidade de resultado conclusivo.", suggestion: "Configuração ideal! Prossiga com a coleta." };
 };
 
 const levelColor = (l: string) => l === "green" ? "text-success" : l === "yellow" ? "text-warning" : "text-destructive";
 const levelBg = (l: string) => l === "green" ? "bg-success/10" : l === "yellow" ? "bg-warning/10" : "bg-destructive/10";
+const levelBorder = (l: string) => l === "green" ? "border-success" : l === "yellow" ? "border-warning" : "border-destructive";
+const levelBgSolid = (l: string) => l === "green" ? "bg-success" : l === "yellow" ? "bg-warning" : "bg-destructive";
 
-/* ───── Component ───── */
 const Simulador = () => {
   const [members, setMembers] = useState(INITIAL_MEMBERS);
-  const [showTRV, setShowTRV] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
-  const [custoExame, setCustoExame] = useState("");
-  const [valorTerceirizado, setValorTerceirizado] = useState("");
-  const [valorKit, setValorKit] = useState("");
   const [filhoSex, setFilhoSex] = useState<"M" | "F">("M");
 
-  const toggle = (id: string) => {
-    setMembers((prev) =>
-      prev.map((m) => (m.id === id && m.id !== "filho" ? { ...m, added: !m.added } : m))
-    );
-  };
-
-  const removeMember = (id: string) => {
-    setMembers(prev => prev.filter(m => m.id !== id));
-  };
-
-  const updateFilhoSex = (sex: "M" | "F") => {
-    setFilhoSex(sex);
-    setMembers(prev => prev.map(m => m.id === "filho" ? { ...m, sex } : m));
-  };
+  const toggle = (id: string) => setMembers(prev => prev.map(m => (m.id === id && m.id !== "filho" ? { ...m, added: !m.added } : m)));
+  const removeMember = (id: string) => setMembers(prev => prev.filter(m => m.id !== id));
+  const updateFilhoSex = (sex: "M" | "F") => { setFilhoSex(sex); setMembers(prev => prev.map(m => m.id === "filho" ? { ...m, sex } : m)); };
 
   const addInvestigante = (role: string, sex: "M" | "F") => {
-    const id = `ivt_${Date.now()}`;
-    setMembers(prev => [...prev, {
-      id, role, label: role, icon: Baby, added: true, side: "investigante" as const, weight: 0, sex, custom: true,
-    }]);
-    toast.success(`${role} adicionado aos investigantes`);
+    setMembers(prev => [...prev, { id: `ivt_${Date.now()}`, role, label: role, icon: Baby, added: true, side: "investigante", weight: 0, sex, custom: true }]);
+    toast.success(`${role} adicionado`);
   };
-
   const addInvestigado = (role: string, sex: "M" | "F") => {
-    const id = `ivd_${Date.now()}`;
-    setMembers(prev => [...prev, {
-      id, role, label: role, icon: Users, added: true, side: "investigado" as const, weight: 14, sex, custom: true,
-    }]);
-    toast.success(`${role} adicionado aos investigados`);
+    setMembers(prev => [...prev, { id: `ivd_${Date.now()}`, role, label: role, icon: Users, added: true, side: "investigado", weight: 14, sex, custom: true }]);
+    toast.success(`${role} adicionado`);
   };
 
   const investigantes = members.filter(m => m.side === "investigante");
@@ -123,23 +77,30 @@ const Simulador = () => {
   const addedInvestigantes = investigantes.filter(m => m.added);
   const addedInvestigados = investigados.filter(m => m.added);
 
-  const viability = members.filter((m) => m.added).reduce((acc, m) => acc + m.weight, 0);
+  const viability = members.filter(m => m.added).reduce((acc, m) => acc + m.weight, 0);
   const capped = Math.min(viability, 100);
-  const vInfo = getViabilityInfo(capped);
-
   const filhoSexValue = members.find(m => m.id === "filho")?.sex || "M";
   const hasSameSexRelative = addedInvestigados.some(m => m.sex === filhoSexValue);
-  const sameSexWarning = addedInvestigados.length > 0 && !hasSameSexRelative;
+  const statusInfo = getStatusInfo(capped, hasSameSexRelative, addedInvestigados.length);
 
   if (showFicha) {
     const fichaParticipants = [
       ...addedInvestigantes.map(m => ({ role: m.label, colorClass: "filho" })),
       ...addedInvestigados.map(m => ({ role: m.label, colorClass: "parente" })),
     ];
-    return (
-      <FichaDNAja examType="reconstituicao" modality="judicial" participants={fichaParticipants} onClose={() => setShowFicha(false)} />
-    );
+    return <FichaDNAja examType="reconstituicao" modality="judicial" participants={fichaParticipants} onClose={() => setShowFicha(false)} />;
   }
+
+  // Color map for tree nodes
+  const nodeColor = (m: FamilyMember) => {
+    if (m.id === "filho") return "border-success bg-success/10 text-success";
+    if (m.id === "mae") return "border-pink-400 bg-pink-50 text-pink-600";
+    if (m.side === "investigado") {
+      if (m.id === "mae_sp" || m.id === "pai_sp") return "border-amber-400 bg-amber-50 text-amber-600";
+      return "border-primary bg-primary/10 text-primary";
+    }
+    return "border-muted-foreground bg-muted text-muted-foreground";
+  };
 
   return (
     <div className="space-y-6">
@@ -158,9 +119,8 @@ const Simulador = () => {
             <p className="font-semibold text-primary text-sm">O que é Reconstituição Genética?</p>
             <p className="text-xs text-muted-foreground mt-1">
               Processo de recompor o perfil genético de uma pessoa falecida/ausente a partir do DNA de seus parentes de 1º grau.
-              O laboratório utiliza cálculos bayesianos (W = LR / LR+1) para estimar a probabilidade de vínculo.
             </p>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground mt-1">
               <strong>Regra fundamental:</strong> Ao menos um parente do <strong>mesmo sexo</strong> do filho(a) investigante.
             </p>
           </div>
@@ -173,267 +133,197 @@ const Simulador = () => {
           <div className="flex items-center gap-4 flex-wrap">
             <Label className="font-semibold text-sm whitespace-nowrap">Sexo do Filho(a) Investigante:</Label>
             <div className="flex gap-2">
-              <Button size="sm" variant={filhoSex === "M" ? "default" : "outline"} onClick={() => updateFilhoSex("M")} className={filhoSex === "M" ? "bg-primary" : ""}>
-                👦 Masculino
-              </Button>
-              <Button size="sm" variant={filhoSex === "F" ? "default" : "outline"} onClick={() => updateFilhoSex("F")} className={filhoSex === "F" ? "bg-[hsl(330,81%,60%)]" : ""}>
-                👧 Feminino
-              </Button>
+              <Button size="sm" variant={filhoSex === "M" ? "default" : "outline"} onClick={() => updateFilhoSex("M")} className={filhoSex === "M" ? "bg-primary" : ""}>👦 Masculino</Button>
+              <Button size="sm" variant={filhoSex === "F" ? "default" : "outline"} onClick={() => updateFilhoSex("F")} className={filhoSex === "F" ? "bg-[hsl(330,81%,60%)]" : ""}>👧 Feminino</Button>
             </div>
-            <Badge variant="outline" className="text-xs">
-              Precisa de parente {filhoSex === "M" ? "♂ masculino" : "♀ feminino"} do SP
-            </Badge>
+            <Badge variant="outline" className="text-xs">Precisa de parente {filhoSex === "M" ? "♂ masculino" : "♀ feminino"} do SP</Badge>
           </div>
         </div>
       </Card>
 
-      {/* Main layout */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* LEFT: Investigantes */}
-        <Card className="border-primary/30 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary/10 to-transparent px-5 py-3 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="font-bold text-sm">Investigantes</p>
-                  <p className="text-xs text-muted-foreground">Quem busca a resposta</p>
+      {/* Family Tree + Status */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        {/* Family Tree Visual */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="h-5 w-5 text-chart-4" /> Árvore Genealógica
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="relative min-h-[400px] bg-muted/20 rounded-xl p-6">
+              {/* Avós row */}
+              <div className="flex justify-center gap-6 mb-2">
+                {investigados.filter(m => m.id === "pai_sp" || m.id === "mae_sp").map(m => (
+                  <button key={m.id} onClick={() => toggle(m.id)} className={`rounded-xl border-2 p-3 w-24 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 bg-muted/30 text-muted-foreground opacity-60"}`}>
+                    <div className="text-2xl mb-1">{m.sex === "M" ? "👤" : "👤"}</div>
+                    <p className="text-xs font-semibold">{m.label}</p>
+                    {!m.added && <p className="text-[10px] text-muted-foreground mt-1">Clique p/ incluir</p>}
+                  </button>
+                ))}
+              </div>
+
+              {/* Connector line */}
+              <div className="flex justify-center"><div className="w-0.5 h-6 bg-border" /></div>
+
+              {/* Sup. Pai row */}
+              <div className="flex justify-center gap-4 mb-2">
+                {/* Siblings left */}
+                <div className="flex gap-2">
+                  {investigados.filter(m => m.id === "irmao" || (m.custom && m.side === "investigado" && m.sex === "M")).map(m => (
+                    <button key={m.id} onClick={() => m.custom ? removeMember(m.id) : toggle(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 opacity-60"}`}>
+                      <div className="text-lg">👤</div>
+                      <p className="text-[10px] font-semibold truncate">{m.label}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Deceased father */}
+                <div className="rounded-xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-3 w-28 text-center">
+                  <div className="text-2xl">👤</div>
+                  <p className="text-xs font-semibold text-muted-foreground">Sup. Pai</p>
+                  <Badge variant="destructive" className="text-[10px] mt-1">Falecido</Badge>
+                </div>
+
+                {/* Siblings right */}
+                <div className="flex gap-2">
+                  {investigados.filter(m => m.id === "irma" || (m.custom && m.side === "investigado" && m.sex === "F")).map(m => (
+                    <button key={m.id} onClick={() => m.custom ? removeMember(m.id) : toggle(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 opacity-60"}`}>
+                      <div className="text-lg">👤</div>
+                      <p className="text-[10px] font-semibold truncate">{m.label}</p>
+                    </button>
+                  ))}
                 </div>
               </div>
-              <Badge variant="outline" className="text-primary border-primary/30">
-                {addedInvestigantes.length}
-              </Badge>
-            </div>
-          </div>
-          <CardContent className="p-4 space-y-3">
-            {investigantes.map((m) => (
-              <div key={m.id} className={`flex items-center justify-between rounded-xl border-2 p-3 transition-all duration-200 ${m.added ? "bg-primary/5 border-primary/20 shadow-sm" : "opacity-50 border-dashed"}`}>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                    <m.icon className="h-5 w-5 text-primary" />
+
+              {/* Filhos legítimos */}
+              <div className="flex justify-center gap-3 mb-2">
+                {investigados.filter(m => m.id === "filho_leg" || m.id === "filha_leg").map(m => (
+                  <button key={m.id} onClick={() => toggle(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed border-muted-foreground/30 opacity-60"}`}>
+                    <div className="text-lg">{m.sex === "M" ? "👦" : "👧"}</div>
+                    <p className="text-[10px] font-semibold truncate">{m.label}</p>
+                  </button>
+                ))}
+              </div>
+
+              {/* Connector */}
+              <div className="flex justify-center"><div className="w-0.5 h-6 bg-border" /></div>
+
+              {/* Investigantes row */}
+              <div className="flex justify-center gap-6">
+                {investigantes.filter(m => m.id === "mae").map(m => (
+                  <button key={m.id} onClick={() => toggle(m.id)} className={`rounded-xl border-2 p-3 w-24 text-center transition-all hover:scale-105 ${m.added ? nodeColor(m) : "border-dashed opacity-60"}`}>
+                    <div className="text-2xl">💗</div>
+                    <p className="text-xs font-semibold">Mãe Bio</p>
+                  </button>
+                ))}
+                {investigantes.filter(m => m.id === "filho").map(m => (
+                  <div key={m.id} className={`rounded-xl border-2 p-3 w-24 text-center ${nodeColor(m)}`}>
+                    <div className="text-2xl">{filhoSex === "M" ? "👦" : "👧"}</div>
+                    <p className="text-xs font-semibold">Filho(a)</p>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold">{m.label}</p>
-                    <p className="text-xs text-muted-foreground">{m.role} {m.id === "filho" ? `(${filhoSex === "M" ? "♂" : "♀"})` : ""}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  {m.id !== "filho" && (
-                    <Button size="sm" variant="ghost" onClick={() => toggle(m.id)}>
-                      {m.added ? <UserMinus className="h-4 w-4 text-destructive" /> : <UserPlus className="h-4 w-4 text-success" />}
-                    </Button>
-                  )}
-                  {m.custom && (
-                    <Button size="sm" variant="ghost" onClick={() => removeMember(m.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
+                ))}
+                {investigantes.filter(m => m.custom).map(m => (
+                  <button key={m.id} onClick={() => removeMember(m.id)} className={`rounded-xl border-2 p-2 w-20 text-center transition-all hover:scale-105 ${nodeColor(m)}`}>
+                    <div className="text-lg">{m.sex === "M" ? "👦" : "👧"}</div>
+                    <p className="text-[10px] font-semibold truncate">{m.label}</p>
+                  </button>
+                ))}
+              </div>
+
+              {/* Add buttons */}
+              <div className="mt-4 pt-4 border-t border-dashed">
+                <p className="text-xs text-muted-foreground mb-2 font-semibold">Adicionar participantes:</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" onClick={() => addInvestigado("Irmão 2", "M")}><Plus className="mr-1 h-3 w-3" /> + Irmão ♂</Button>
+                  <Button variant="outline" size="sm" onClick={() => addInvestigado("Irmã 2", "F")}><Plus className="mr-1 h-3 w-3" /> + Irmã ♀</Button>
+                  <Button variant="outline" size="sm" onClick={() => addInvestigante("Filho(a) 2", filhoSex)}><Plus className="mr-1 h-3 w-3" /> + Filho(a)</Button>
                 </div>
               </div>
-            ))}
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" onClick={() => addInvestigante("Filho(a) Adicional", filhoSex)}>
-                <Plus className="mr-1 h-3 w-3" /> + Filho(a)
-              </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* RIGHT: Investigados */}
-        <Card className="border-chart-4/30 overflow-hidden">
-          <div className="bg-gradient-to-r from-chart-4/10 to-transparent px-5 py-3 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-chart-4" />
-                <div>
-                  <p className="font-bold text-sm">Investigados</p>
-                  <p className="text-xs text-muted-foreground">Parentes em 1º grau do SP</p>
-                </div>
+        {/* Status panel */}
+        <div className="space-y-4">
+          {/* Traffic Light Status */}
+          <Card className={`border-2 ${levelBorder(statusInfo.level)} overflow-hidden`}>
+            <div className={`${levelBg(statusInfo.level)} p-6 text-center`}>
+              <div className={`inline-flex h-24 w-24 items-center justify-center rounded-full ${levelBg(statusInfo.level)} border-4 ${levelBorder(statusInfo.level)}`}>
+                <span className="text-5xl">{statusInfo.level === "green" ? "🟢" : statusInfo.level === "yellow" ? "🟡" : "🔴"}</span>
               </div>
-              <Badge variant="outline" className="text-chart-4 border-chart-4/30">
-                {addedInvestigados.length}
-              </Badge>
+              <p className={`mt-3 font-bold text-lg ${levelColor(statusInfo.level)}`}>{statusInfo.label}</p>
             </div>
-          </div>
-          <CardContent className="p-4 space-y-3">
-            {/* Deceased father */}
-            <div className="rounded-xl border-2 border-dashed border-destructive/40 bg-destructive/5 p-4 text-center">
-              <XCircle className="mx-auto h-8 w-8 text-destructive/60" />
-              <p className="mt-1 font-semibold text-destructive/80">Suposto Pai</p>
-              <Badge variant="destructive" className="mt-1">Falecido / Ausente</Badge>
-            </div>
-
-            {investigados.map((m) => {
-              const isSameSex = m.sex === filhoSexValue;
-              return (
-                <div key={m.id} className={`flex items-center justify-between rounded-xl border-2 p-3 transition-all duration-200 ${
-                  m.added ? `bg-chart-4/5 border-chart-4/20 shadow-sm ${isSameSex ? "ring-2 ring-success/40" : ""}` : "opacity-60 border-dashed"
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${m.added ? "bg-chart-4/10" : "bg-muted"}`}>
-                      <m.icon className={`h-5 w-5 ${m.added ? "text-chart-4" : "text-muted-foreground"}`} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold flex items-center gap-1.5">
-                        {m.label}
-                        {m.added && isSameSex && (
-                          <Badge variant="outline" className="text-[10px] px-1 py-0 border-success text-success">✓ mesmo sexo</Badge>
-                        )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{m.role} ({m.sex === "M" ? "♂" : "♀"})</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => toggle(m.id)}>
-                      {m.added ? <UserMinus className="h-4 w-4 text-destructive" /> : <UserPlus className="h-4 w-4 text-success" />}
-                    </Button>
-                    {m.custom && (
-                      <Button size="sm" variant="ghost" onClick={() => removeMember(m.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
+            <CardContent className="p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">{statusInfo.desc}</p>
+              
+              {/* Suggestion to go green */}
+              {statusInfo.level !== "green" && (
+                <div className="rounded-lg border border-success/30 bg-success/5 p-3">
+                  <p className="text-xs font-bold text-success mb-1">💡 Como tornar Verde:</p>
+                  <p className="text-xs text-muted-foreground">{statusInfo.suggestion}</p>
                 </div>
-              );
-            })}
+              )}
+            </CardContent>
+          </Card>
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1" onClick={() => addInvestigado("Irmão Adicional do SP", "M")}>
-                <Plus className="mr-1 h-3 w-3" /> + Irmão ♂
-              </Button>
-              <Button variant="outline" size="sm" className="flex-1" onClick={() => addInvestigado("Irmã Adicional do SP", "F")}>
-                <Plus className="mr-1 h-3 w-3" /> + Irmã ♀
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Selected members */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Parentes Selecionados</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {addedInvestigantes.map(m => (
+                <div key={m.id} className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-success" />
+                    {m.label} ({m.sex === "M" ? "♂" : "♀"})
+                  </span>
+                  <Badge variant="outline" className="text-[10px] border-success text-success">Investigante</Badge>
+                </div>
+              ))}
+              {addedInvestigados.map(m => {
+                const isSameSex = m.sex === filhoSexValue;
+                return (
+                  <div key={m.id} className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${isSameSex ? "bg-success" : "bg-primary"}`} />
+                      {m.label} ({m.sex === "M" ? "♂" : "♀"})
+                      {isSameSex && <span className="text-[10px] text-success">✓ mesmo sexo</span>}
+                    </span>
+                    <span className="text-xs text-chart-4 font-mono">+{m.weight}%</span>
+                  </div>
+                );
+              })}
+              {addedInvestigados.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">Clique nos nós da árvore para incluir</p>}
+            </CardContent>
+          </Card>
+
+          {/* Open Ficha */}
+          <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={() => setShowFicha(true)}>
+            <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro
+          </Button>
+        </div>
       </div>
 
       {/* Same-sex warning */}
-      {sameSexWarning && (
-        <div className="flex items-start gap-3 rounded-lg border-2 border-destructive bg-destructive/5 p-4 animate-in fade-in">
+      {addedInvestigados.length > 0 && !hasSameSexRelative && (
+        <div className="flex items-start gap-3 rounded-lg border-2 border-destructive bg-destructive/5 p-4">
           <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-destructive">⚠️ ALERTA: Nenhum parente do mesmo sexo do investigante</p>
+            <p className="font-bold text-destructive">⚠️ ALERTA: Nenhum parente do mesmo sexo</p>
             <p className="text-sm text-muted-foreground mt-1">
-              O filho(a) investigante é <strong>{filhoSex === "M" ? "masculino" : "feminino"}</strong>. Isso reduz a conclusividade em <strong>10-15%</strong>.
+              O investigante é <strong>{filhoSex === "M" ? "masculino" : "feminino"}</strong>. Adicione um parente <strong>{filhoSex === "M" ? "♂ masculino" : "♀ feminino"}</strong> do suposto pai.
             </p>
           </div>
         </div>
       )}
 
-      {/* Viability Gauge */}
-      <Card className="overflow-hidden">
-        <div className="bg-gradient-to-r from-muted/50 to-transparent px-5 py-3 border-b">
-          <p className="font-bold text-lg">Viabilidade da Reconstituição</p>
-        </div>
-        <CardContent className="p-5">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="relative flex h-48 w-48 items-center justify-center">
-                <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="50" fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
-                  <circle cx="60" cy="60" r="50" fill="none"
-                    stroke={capped <= 40 ? "hsl(var(--destructive))" : capped <= 60 ? "hsl(var(--warning))" : capped <= 80 ? "hsl(var(--chart-4))" : "hsl(var(--success))"}
-                    strokeWidth="10"
-                    strokeDasharray={`${(capped / 100) * 314} 314`}
-                    strokeLinecap="round"
-                    className="transition-all duration-700"
-                  />
-                </svg>
-                <div className="absolute text-center">
-                  <p className={`text-5xl font-bold ${vInfo.color}`}>{capped}%</p>
-                  <p className="text-xs text-muted-foreground">Viabilidade</p>
-                </div>
-              </div>
-              <Badge className={`${vInfo.bg} text-white text-sm px-4 py-1`}>{vInfo.label}</Badge>
-              <p className="text-sm text-muted-foreground max-w-xs text-center">{vInfo.desc}</p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="rounded-xl border p-4 space-y-2 text-sm bg-muted/20">
-                <p><strong>Índice Mínimo Legal:</strong> 99,99% (Resolução CFM)</p>
-                <p><strong>Probabilidade estimada:</strong> <span className={`font-bold ${vInfo.color}`}>{vInfo.prob}</span></p>
-                <p><strong>Investigantes:</strong> {addedInvestigantes.map(m => m.label).join(", ")}</p>
-                <p><strong>Investigados:</strong> {addedInvestigados.length > 0 ? addedInvestigados.map(m => `${m.label} (${m.sex === "M" ? "♂" : "♀"})`).join(", ") : "Nenhum"}</p>
-                <p><strong>Parente do mesmo sexo:</strong> {hasSameSexRelative ? <span className="text-success font-bold">✓ Sim</span> : <span className="text-destructive font-bold">✗ Não</span>}</p>
-              </div>
-
-              <div className="flex gap-2">
-                {capped <= 60 && (
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setShowTRV(true); toast.info("Declaração TRV abaixo"); }}>
-                    <FileText className="mr-1 h-4 w-4" /> Gerar TRV
-                  </Button>
-                )}
-                <Button size="sm" className="flex-1 bg-success hover:bg-success/90" onClick={() => setShowFicha(true)}>
-                  <ArrowRight className="mr-1 h-4 w-4" /> Abrir Ficha de Cadastro
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Custo */}
-      <Card className="border-success/20">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-success" /> Custo do Exame
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Valor do Exame (venda)</Label>
-              <Input type="text" placeholder="0,00" value={custoExame} onChange={(e) => setCustoExame(e.target.value)} className="text-lg font-bold font-mono" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Valor Terceirizado (lab)</Label>
-              <Input type="text" placeholder="0,00" value={valorTerceirizado} onChange={(e) => setValorTerceirizado(e.target.value)} className="font-mono" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Valor do Kit</Label>
-              <Input type="text" placeholder="0,00" value={valorKit} onChange={(e) => setValorKit(e.target.value)} className="font-mono" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Participantes</Label>
-              <div className="flex h-10 items-center rounded-md border bg-muted/50 px-3 text-sm font-bold">
-                {members.filter(m => m.added).length} pessoa(s)
-              </div>
-            </div>
-          </div>
-          {custoExame && (
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border bg-muted/30 p-3 text-center">
-                <p className="text-xs text-muted-foreground">Custo por Participante</p>
-                <p className="text-lg font-bold font-mono text-primary">
-                  {(() => { const val = parseFloat(custoExame.replace(",", ".")); const count = Math.max(members.filter(m => m.added).length, 1); return !isNaN(val) ? `R$ ${(val / count).toFixed(2)}` : "—"; })()}
-                </p>
-              </div>
-              <div className="rounded-xl border bg-warning/5 p-3 text-center">
-                <p className="text-xs text-muted-foreground">Custo Total (lab + kit)</p>
-                <p className="text-lg font-bold font-mono text-warning">
-                  R$ {((parseFloat(valorTerceirizado.replace(",", ".")) || 0) + (parseFloat(valorKit.replace(",", ".")) || 0)).toFixed(2)}
-                </p>
-              </div>
-              <div className="rounded-xl border bg-success/5 p-3 text-center">
-                <p className="text-xs text-muted-foreground">Margem Bruta</p>
-                <p className="text-lg font-bold font-mono text-success">
-                  R$ {((parseFloat(custoExame.replace(",", ".")) || 0) - (parseFloat(valorTerceirizado.replace(",", ".")) || 0) - (parseFloat(valorKit.replace(",", ".")) || 0)).toFixed(2)}
-                </p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Probability Table */}
+      {/* Reference Tables */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Scale className="h-5 w-5 text-primary" /> Tabela de Probabilidade
-          </CardTitle>
-          <CardDescription>Estimativa por configuração familiar</CardDescription>
+          <CardTitle className="text-lg flex items-center gap-2"><Scale className="h-5 w-5 text-primary" /> Tabela de Configurações</CardTitle>
+          <CardDescription>Estimativa por cenário familiar — sem percentuais, apenas status</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -441,15 +331,30 @@ const Simulador = () => {
               <thead>
                 <tr className="border-b">
                   <th className="py-2 pr-4 text-left font-semibold">Configuração</th>
-                  <th className="py-2 pr-4 text-left font-semibold">Probabilidade</th>
+                  <th className="py-2 pr-4 text-left font-semibold">Status</th>
                   <th className="py-2 text-left font-semibold">Observação</th>
                 </tr>
               </thead>
               <tbody>
-                {PROB_TABLE.map((row, i) => (
+                {[
+                  { config: "Mãe + Filho + Avós Paternos (Pai e Mãe do SP)", level: "green" as const, obs: "Padrão Ouro. Avós possuem carga genética completa." },
+                  { config: "Mãe + Filho + 3+ Irmãos Germanos", level: "green" as const, obs: "Alta robustez estatística." },
+                  { config: "Mãe + Filho + Avó + 1 Irmão (mesmo sexo)", level: "green" as const, obs: "Cromossomo X/Y compartilhado reforça vínculo." },
+                  { config: "Mãe + Filho + 2 Irmãos (um do mesmo sexo)", level: "green" as const, obs: "Boa configuração." },
+                  { config: "Mãe + Filho + 1 Irmão do mesmo sexo", level: "yellow" as const, obs: "Zona Cinzenta alta. Pode necessitar ampliação." },
+                  { config: "Mãe + Filho + 1 Irmão do sexo oposto", level: "yellow" as const, obs: "Sem cromossomo sexual compartilhado." },
+                  { config: "Mãe + Filho + Apenas Filhos Legítimos", level: "yellow" as const, obs: "Depende do sexo do filho legítimo." },
+                  { config: "Filho + Irmãos (SEM a Mãe)", level: "red" as const, obs: "Ausência do DNA materno dificulta triagem." },
+                  { config: "Apenas 1 Progenitor (só Avô ou só Avó)", level: "red" as const, obs: "Falta metade da carga genética do SP." },
+                  { config: "Nenhum parente do mesmo sexo", level: "red" as const, obs: "Regra crítica: cromossomos sexuais não confirmam." },
+                ].map((row, i) => (
                   <tr key={i} className={`border-b last:border-0 ${levelBg(row.level)}`}>
                     <td className="py-3 pr-4 font-medium">{row.config}</td>
-                    <td className={`py-3 pr-4 font-bold whitespace-nowrap ${levelColor(row.level)}`}>{row.prob}</td>
+                    <td className="py-3 pr-4">
+                      <Badge className={`${levelBgSolid(row.level)} text-white`}>
+                        {row.level === "green" ? "🟢 Viável" : row.level === "yellow" ? "🟡 Cinzenta" : "🔴 Inviável"}
+                      </Badge>
+                    </td>
                     <td className="py-3 text-muted-foreground text-xs">{row.obs}</td>
                   </tr>
                 ))}
@@ -459,86 +364,17 @@ const Simulador = () => {
         </CardContent>
       </Card>
 
-      {/* LR Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Scale className="h-5 w-5 text-chart-4" /> Razão de Verossimilhança (LR) vs. Probabilidade (W)
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-2 pr-4 text-left font-semibold">Valor de W</th>
-                  <th className="py-2 pr-4 text-left font-semibold">Interpretação</th>
-                  <th className="py-2 text-left font-semibold">Status Jurídico</th>
-                </tr>
-              </thead>
-              <tbody>
-                {LR_TABLE.map((row, i) => (
-                  <tr key={i} className={`border-b last:border-0 ${levelBg(row.level)}`}>
-                    <td className={`py-3 pr-4 font-bold ${levelColor(row.level)}`}>{row.w}</td>
-                    <td className="py-3 pr-4">{row.interp}</td>
-                    <td className="py-3 text-muted-foreground text-xs">{row.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* TRV */}
-      {showTRV && (
-        <Card className="border-warning/30 bg-warning/5">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <FileText className="h-5 w-5 text-warning" /> Termo de Reconstituição e Veracidade (TRV)
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border bg-card p-4 space-y-4 text-sm">
-              <div className="space-y-2">
-                <Label className="font-semibold text-sm">Identificação do Parente Colaborador</Label>
-                <Input placeholder="Nome completo" />
-                <Input placeholder="RG / CPF" />
-              </div>
-              <Separator />
-              <div className="space-y-2">
-                <Label className="font-semibold text-sm">Declaração de Parentesco</Label>
-                <Input placeholder="Grau de parentesco" />
-                <Input placeholder="Nome do Suposto Pai Falecido" />
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowTRV(false)}>Fechar</Button>
-              <Button onClick={() => toast.success("TRV gerado com sucesso!")}><FileText className="mr-1 h-4 w-4" /> Gerar PDF</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Strategic Notes */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Info className="h-5 w-5 text-info" /> Orientações Estratégicas
-          </CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Info className="h-5 w-5 text-info" /> Orientações Estratégicas</CardTitle></CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="rounded-lg bg-muted/50 p-3">
             <p className="font-semibold">Regra do Mesmo Sexo</p>
-            <p className="text-muted-foreground text-xs mt-1">
-              Pelo menos um parente do suposto pai deve ser do mesmo sexo do filho(a) investigante para comparação dos cromossomos sexuais (X/Y).
-            </p>
+            <p className="text-muted-foreground text-xs mt-1">Pelo menos um parente do suposto pai deve ser do mesmo sexo do filho(a) investigante para comparação dos cromossomos sexuais (X/Y).</p>
           </div>
           <div className="rounded-lg bg-muted/50 p-3">
             <p className="font-semibold">Efeito Bayes & Painel NGS</p>
-            <p className="text-muted-foreground text-xs mt-1">
-              Painéis de 47+ marcadores (NGS) elevam o LR consideravelmente. Quando na Zona Cinzenta (80-95%), solicitar ampliação.
-            </p>
+            <p className="text-muted-foreground text-xs mt-1">Painéis de 47+ marcadores (NGS) elevam o LR. Quando na Zona Cinzenta, solicitar ampliação.</p>
           </div>
         </CardContent>
       </Card>
