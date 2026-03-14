@@ -1,7 +1,8 @@
 import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
-  Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap } from
+  Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap,
+  Building2, ShieldCheck } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -23,7 +24,10 @@ const NAV_ITEMS = [
   { title: "Documentos", url: "/documentos", icon: Receipt, roles: ["admin", "coletor"] },
   { title: "Dr. DNAW", url: "/jornada-dna", icon: GraduationCap, roles: ["admin", "coletor", "triagem"] },
   { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
+  { title: "Etiquetas", url: "/etiquetas", icon: Barcode, roles: ["admin", "coletor"] },
   { title: "IPM", url: "/ipm", icon: ClipboardList, roles: ["admin", "coletor"] },
+  { title: "Portal Credenciado", url: "/portal", icon: Building2, roles: ["admin"] },
+  { title: "Profissionais", url: "/profissionais", icon: ShieldCheck, roles: ["admin"] },
   { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
   { title: "Tendências", url: "/tendencias", icon: TrendingUp, roles: ["admin"] },
   { title: "Configurações", url: "/configuracoes", icon: Settings, roles: ["admin"] },
@@ -39,7 +43,10 @@ const ICON_COLORS: Record<string, string> = {
   Documentos: "text-primary",
   "Dr. DNAW": "text-chart-3",
   "Calculadora DNAjá": "text-success",
+  "Etiquetas": "text-chart-4",
   "IPM": "text-destructive",
+  "Portal Credenciado": "text-primary",
+  "Profissionais": "text-chart-3",
   "CRM Comercial": "text-chart-3",
   Tendências: "text-chart-3",
   Configurações: "text-muted-foreground",

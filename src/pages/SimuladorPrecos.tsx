@@ -110,6 +110,7 @@ const SimuladorPrecos = () => {
   const [valorKit, setValorKit] = useState("");
   const [valorVendaCustom, setValorVendaCustom] = useState("");
   const [faturamentoAnual, setFaturamentoAnual] = useState("360000");
+  const [comissao, setComissao] = useState("");
 
   // Etiqueta generator
   const [etiquetaPrefix, setEtiquetaPrefix] = useState("DNA");
@@ -124,7 +125,8 @@ const SimuladorPrecos = () => {
   const valorVenda = valorVendaCustom ? parseFloat(valorVendaCustom.replace(",", ".")) || valorTabela : valorTabela;
   const custoTerc = valorTerceirizado ? parseFloat(valorTerceirizado.replace(",", ".")) || 0 : 0;
   const custoKit = valorKit ? parseFloat(valorKit.replace(",", ".")) || 0 : 0;
-  const custoTotal = custoTerc + custoKit;
+  const comissaoVal = comissao ? parseFloat(comissao.replace(",", ".")) || 0 : 0;
+  const custoTotal = custoTerc + custoKit + comissaoVal;
 
   let taxInfo: TaxInfo;
   let totalTaxRate: number;
@@ -219,6 +221,7 @@ const SimuladorPrecos = () => {
             <CardContent className="space-y-3">
               <div className="space-y-1.5"><Label className="text-xs font-semibold">Valor Terceirizado</Label><Input value={valorTerceirizado} onChange={e => setValorTerceirizado(e.target.value)} placeholder="0,00" className="font-mono" /></div>
               <div className="space-y-1.5"><Label className="text-xs font-semibold">Valor do Kit</Label><Input value={valorKit} onChange={e => setValorKit(e.target.value)} placeholder="0,00" className="font-mono" /></div>
+              <div className="space-y-1.5"><Label className="text-xs font-semibold">Comissão</Label><Input value={comissao} onChange={e => setComissao(e.target.value)} placeholder="0,00" className="font-mono" /></div>
               <Separator />
               <div className="flex justify-between text-sm font-semibold"><span>Custo Total</span><span className="font-mono text-warning">{fmt(custoTotal)}</span></div>
             </CardContent>
