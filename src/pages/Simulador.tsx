@@ -204,7 +204,7 @@ const Simulador = () => {
       ...addedInvestigantes.map(m => ({ role: m.label, colorClass: "filho" })),
       ...addedInvestigados.map(m => ({ role: m.label, colorClass: "parente" })),
     ];
-    return <FichaDNAja examType="reconstituicao" modality="judicial" participants={fichaParticipants} onClose={() => setShowFicha(false)} />;
+    return <FichaDNAja examType="reconstituicao" modality={modalidade} participants={fichaParticipants} onClose={() => setShowFicha(false)} />;
   }
 
   // Color map for tree nodes
