@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const verify2FA = (_code: string) => {
     const newUser: User = {
-      name: "Usuário Demo",
+      name: "Waltinho",
       email: tempEmail,
       role: "admin",
     };
