@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,11 @@ import {
   Activity, UserPlus, UserMinus, Users, Baby, Heart,
   AlertTriangle, CheckCircle2, XCircle, Shield, Scale,
   FileText, Search, Crown, Info, ArrowRight, DollarSign,
-  User, Plus, Trash2,
+  User, Plus, Trash2, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { FichaDNAja } from "@/components/FichaDNAja";
+import jsPDF from "jspdf";
 
 interface FamilyMember {
   id: string;
