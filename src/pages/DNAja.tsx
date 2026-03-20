@@ -68,6 +68,17 @@ const DNAja = () => {
       id: Date.now().toString(), barcode, etiqueta, kitPrice: parseBRL(kitPrice),
       salePrice: parseBRL(salePrice), modalidade, date: new Date().toLocaleDateString("pt-BR"),
     };
+
+    if (modalidade === "presencial") {
+      // Go straight to voucher
+      const lab = findNearestLab(cidadeCliente);
+      setSales(prev => [...prev, { barcode: item.barcode, etiqueta: item.etiqueta || `DNA${item.id.slice(-4)}`, status: "vendido" }]);
+      setShowVoucher({ item, lab });
+      setBarcode(""); setEtiqueta("");
+      toast.success("Voucher gerado com sucesso!");
+      return;
+    }
+
     setCart([...cart, item]);
     setBarcode(""); setEtiqueta("");
     toast.success("Kit adicionado ao carrinho");
@@ -118,7 +129,7 @@ const DNAja = () => {
         </div>
         <div className="mx-auto max-w-xl p-8 print:p-4">
           <div className="rounded-xl border-2 border-success p-8 space-y-6">
-            <div className="text-center space-y-2">
+           <div className="text-center space-y-2">
               <h1 className="text-2xl font-bold text-success">🧬 VOUCHER DE COLETA PRESENCIAL</h1>
               <p className="text-sm text-muted-foreground">DNAjá® - Kit Auto Coleta</p>
               <Separator />
@@ -128,6 +139,10 @@ const DNAja = () => {
               <div><p className="text-xs text-muted-foreground">Etiqueta DNA</p><p className="font-mono font-bold">{showVoucher.item.etiqueta || "—"}</p></div>
               <div><p className="text-xs text-muted-foreground">Data de Emissão</p><p className="font-bold">{showVoucher.item.date}</p></div>
               <div><p className="text-xs text-muted-foreground">Validade</p><p className="font-bold text-warning">30 dias</p></div>
+            </div>
+            <div className="rounded-lg bg-muted/50 p-3 text-center">
+              <p className="text-xs text-muted-foreground">Valor do Kit</p>
+              <p className="text-xl font-bold font-mono text-success">R$ {showVoucher.item.salePrice.toFixed(2)}</p>
             </div>
             <Separator />
 
@@ -298,7 +313,11 @@ const DNAja = () => {
               </div>
 
               <Button className="w-full h-12 bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white text-base" onClick={addToCart}>
-                <CheckCircle2 className="mr-2 h-5 w-5" /> Registrar Venda
+                {modalidade === "presencial" ? (
+                  <><Ticket className="mr-2 h-5 w-5" /> Gerar Voucher</>
+                ) : (
+                  <><CheckCircle2 className="mr-2 h-5 w-5" /> Registrar Venda</>
+                )}
               </Button>
             </CardContent>
           </Card>
