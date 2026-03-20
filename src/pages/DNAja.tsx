@@ -68,6 +68,17 @@ const DNAja = () => {
       id: Date.now().toString(), barcode, etiqueta, kitPrice: parseBRL(kitPrice),
       salePrice: parseBRL(salePrice), modalidade, date: new Date().toLocaleDateString("pt-BR"),
     };
+
+    if (modalidade === "presencial") {
+      // Go straight to voucher
+      const lab = findNearestLab(cidadeCliente);
+      setSales(prev => [...prev, { barcode: item.barcode, etiqueta: item.etiqueta || `DNA${item.id.slice(-4)}`, status: "vendido" }]);
+      setShowVoucher({ item, lab });
+      setBarcode(""); setEtiqueta("");
+      toast.success("Voucher gerado com sucesso!");
+      return;
+    }
+
     setCart([...cart, item]);
     setBarcode(""); setEtiqueta("");
     toast.success("Kit adicionado ao carrinho");
