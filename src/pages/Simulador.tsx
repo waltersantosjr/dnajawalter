@@ -503,7 +503,7 @@ const Simulador = () => {
         {/* Action */}
         <div className="flex flex-col justify-between gap-3">
           <Card className="flex-1">
-            <CardContent className="p-4 space-y-2">
+            <CardContent className="p-4 space-y-3">
               <p className="text-xs font-semibold">Resumo</p>
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Investigantes:</span>
@@ -517,10 +517,38 @@ const Simulador = () => {
                 <span>Total participantes:</span>
                 <span className="font-bold">{addedInvestigantes.length + addedInvestigados.length}</span>
               </div>
+              <Separator />
+              <div>
+                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                  <Scale className="h-3.5 w-3.5 text-primary" /> Modalidade do Exame
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setModalidade("judicial")}
+                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-all active:scale-[0.97] ${
+                      modalidade === "judicial"
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:bg-primary/5"
+                    }`}
+                  >
+                    ⚖️ Judicial
+                  </button>
+                  <button
+                    onClick={() => setModalidade("particular")}
+                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-all active:scale-[0.97] ${
+                      modalidade === "particular"
+                        ? "border-amber-500 bg-amber-500 text-white shadow-sm"
+                        : "border-border bg-background text-muted-foreground hover:border-amber-400/40 hover:bg-amber-50"
+                    }`}
+                  >
+                    📋 Particular
+                  </button>
+                </div>
+              </div>
             </CardContent>
           </Card>
           <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={() => setShowFicha(true)}>
-            <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro
+            <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro ({modalidade === "judicial" ? "Judicial" : "Particular"})
           </Button>
           <Button variant="outline" className="w-full" onClick={exportPDF} disabled={exporting}>
             <Download className="mr-2 h-4 w-4" /> {exporting ? "Gerando PDF..." : "Exportar PDF"}
