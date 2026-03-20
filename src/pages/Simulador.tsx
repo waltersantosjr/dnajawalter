@@ -521,6 +521,9 @@ const Simulador = () => {
           <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={() => setShowFicha(true)}>
             <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro
           </Button>
+          <Button variant="outline" className="w-full" onClick={exportPDF} disabled={exporting}>
+            <Download className="mr-2 h-4 w-4" /> {exporting ? "Gerando PDF..." : "Exportar PDF"}
+          </Button>
         </div>
       </div>
 
