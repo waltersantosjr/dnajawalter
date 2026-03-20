@@ -100,7 +100,7 @@ const Simulador = () => {
       doc.setFontSize(18);
       doc.text("RECONSTITUIÇÃO GENÉTICA", w / 2, 14, { align: "center" });
       doc.setFontSize(10);
-      doc.text("GRALAB BIOMOL - DNAJA® | Suposto Pai Falecido/Ausente", w / 2, 22, { align: "center" });
+      doc.text(`GRALAB BIOMOL - DNAJA® | Modalidade: ${modalidade === "judicial" ? "JUDICIAL" : "PARTICULAR"} | Suposto Pai Falecido/Ausente`, w / 2, 22, { align: "center" });
       y = 38;
 
       // Status
