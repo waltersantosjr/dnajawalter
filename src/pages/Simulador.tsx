@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,11 @@ import {
   Activity, UserPlus, UserMinus, Users, Baby, Heart,
   AlertTriangle, CheckCircle2, XCircle, Shield, Scale,
   FileText, Search, Crown, Info, ArrowRight, DollarSign,
-  User, Plus, Trash2,
+  User, Plus, Trash2, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { FichaDNAja } from "@/components/FichaDNAja";
+import jsPDF from "jspdf";
 
 interface FamilyMember {
   id: string;
@@ -56,6 +57,7 @@ const levelBgSolid = (l: string) => l === "green" ? "bg-success" : l === "yellow
 
 const Simulador = () => {
   const [members, setMembers] = useState(INITIAL_MEMBERS);
+  const [exporting, setExporting] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
   const [filhoSex, setFilhoSex] = useState<"M" | "F">("M");
 
@@ -82,6 +84,119 @@ const Simulador = () => {
   const filhoSexValue = members.find(m => m.id === "filho")?.sex || "M";
   const hasSameSexRelative = addedInvestigados.some(m => m.sex === filhoSexValue);
   const statusInfo = getStatusInfo(capped, hasSameSexRelative, addedInvestigados.length);
+
+  const exportPDF = async () => {
+    setExporting(true);
+    try {
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const w = doc.internal.pageSize.getWidth();
+      let y = 15;
+
+      // Header
+      doc.setFillColor(30, 58, 138);
+      doc.rect(0, 0, w, 30, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18);
+      doc.text("RECONSTITUIÇÃO GENÉTICA", w / 2, 14, { align: "center" });
+      doc.setFontSize(10);
+      doc.text("GRALAB BIOMOL - DNAJA® | Suposto Pai Falecido/Ausente", w / 2, 22, { align: "center" });
+      y = 38;
+
+      // Status
+      const statusColor = statusInfo.level === "green" ? [22, 163, 74] : statusInfo.level === "yellow" ? [234, 179, 8] : [220, 38, 38];
+      doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+      doc.roundedRect(14, y, w - 28, 18, 3, 3, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.text(statusInfo.label.replace(/[🟢🟡🔴]\s*/, ""), w / 2, y + 8, { align: "center" });
+      doc.setFontSize(9);
+      doc.text(statusInfo.desc, w / 2, y + 14, { align: "center" });
+      y += 25;
+
+      // Filho investigante sex
+      doc.setTextColor(60, 60, 60);
+      doc.setFontSize(9);
+      doc.text(`Sexo do Filho(a) Investigante: ${filhoSex === "M" ? "Masculino" : "Feminino"}`, 14, y);
+      y += 5;
+      doc.text(`Parente do mesmo sexo presente: ${hasSameSexRelative ? "Sim" : "NÃO"}`, 14, y);
+      y += 10;
+
+      // Investigantes section
+      doc.setFillColor(22, 163, 74);
+      doc.roundedRect(14, y, w - 28, 8, 2, 2, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.text("INVESTIGANTES — Quem busca a resposta", 18, y + 6);
+      y += 13;
+
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(10);
+      addedInvestigantes.forEach(m => {
+        doc.text(`• ${m.label} (${m.sex === "M" ? "♂ Masculino" : "♀ Feminino"})`, 18, y);
+        y += 6;
+      });
+      y += 4;
+
+      // Investigados section
+      doc.setFillColor(37, 99, 235);
+      doc.roundedRect(14, y, w - 28, 8, 2, 2, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.text("INVESTIGADOS — Parentes de 1º grau do Suposto Pai", 18, y + 6);
+      y += 13;
+
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(10);
+      if (addedInvestigados.length === 0) {
+        doc.setTextColor(150, 150, 150);
+        doc.text("Nenhum parente selecionado", 18, y);
+        y += 6;
+      } else {
+        addedInvestigados.forEach(m => {
+          const sameSex = m.sex === filhoSexValue ? " ✓ mesmo sexo" : "";
+          doc.text(`• ${m.label} (${m.sex === "M" ? "♂ Masculino" : "♀ Feminino"})${sameSex}`, 18, y);
+          y += 6;
+        });
+      }
+      y += 6;
+
+      // Summary box
+      doc.setDrawColor(200, 200, 200);
+      doc.setFillColor(248, 248, 248);
+      doc.roundedRect(14, y, w - 28, 24, 2, 2, "FD");
+      doc.setTextColor(60, 60, 60);
+      doc.setFontSize(10);
+      doc.text(`Total Investigantes: ${addedInvestigantes.length}`, 18, y + 7);
+      doc.text(`Total Investigados: ${addedInvestigados.length}`, 18, y + 14);
+      doc.text(`Total de Participantes: ${addedInvestigantes.length + addedInvestigados.length}`, 18, y + 21);
+      y += 32;
+
+      // Suggestion
+      if (statusInfo.level !== "green") {
+        doc.setFillColor(254, 249, 195);
+        doc.roundedRect(14, y, w - 28, 16, 2, 2, "F");
+        doc.setTextColor(120, 90, 0);
+        doc.setFontSize(9);
+        doc.text("Sugestão: " + statusInfo.suggestion, 18, y + 6, { maxWidth: w - 36 });
+        y += 22;
+      }
+
+      // Footer
+      const footerY = doc.internal.pageSize.getHeight() - 12;
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`, w / 2, footerY, { align: "center" });
+      doc.text("GRALAB BIOMOL - DNAJA® | Documento informativo", w / 2, footerY + 4, { align: "center" });
+
+      doc.save("reconstituicao-genetica.pdf");
+      toast.success("PDF exportado com sucesso!");
+    } catch (err) {
+      toast.error("Erro ao gerar PDF");
+      console.error(err);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (showFicha) {
     const fichaParticipants = [
@@ -405,6 +520,9 @@ const Simulador = () => {
           </Card>
           <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={() => setShowFicha(true)}>
             <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro
+          </Button>
+          <Button variant="outline" className="w-full" onClick={exportPDF} disabled={exporting}>
+            <Download className="mr-2 h-4 w-4" /> {exporting ? "Gerando PDF..." : "Exportar PDF"}
           </Button>
         </div>
       </div>
