@@ -60,6 +60,7 @@ const Simulador = () => {
   const [exporting, setExporting] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
   const [filhoSex, setFilhoSex] = useState<"M" | "F">("M");
+  const [modalidade, setModalidade] = useState<"judicial" | "particular">("judicial");
 
   const toggle = (id: string) => setMembers(prev => prev.map(m => (m.id === id && m.id !== "filho" ? { ...m, added: !m.added } : m)));
   const removeMember = (id: string) => setMembers(prev => prev.filter(m => m.id !== id));
