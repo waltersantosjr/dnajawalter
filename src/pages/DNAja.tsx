@@ -313,7 +313,11 @@ const DNAja = () => {
               </div>
 
               <Button className="w-full h-12 bg-[hsl(var(--success))] hover:bg-[hsl(var(--success)/0.9)] text-white text-base" onClick={addToCart}>
-                <CheckCircle2 className="mr-2 h-5 w-5" /> Registrar Venda
+                {modalidade === "presencial" ? (
+                  <><Ticket className="mr-2 h-5 w-5" /> Gerar Voucher</>
+                ) : (
+                  <><CheckCircle2 className="mr-2 h-5 w-5" /> Registrar Venda</>
+                )}
               </Button>
             </CardContent>
           </Card>
