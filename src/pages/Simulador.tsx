@@ -57,6 +57,7 @@ const levelBgSolid = (l: string) => l === "green" ? "bg-success" : l === "yellow
 
 const Simulador = () => {
   const [members, setMembers] = useState(INITIAL_MEMBERS);
+  const [exporting, setExporting] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
   const [filhoSex, setFilhoSex] = useState<"M" | "F">("M");
 
