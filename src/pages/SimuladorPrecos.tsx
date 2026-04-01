@@ -306,15 +306,74 @@ const SimuladorPrecos = () => {
               <Separator />
 
               <div>
-                <p className="text-sm font-semibold mb-3">Detalhamento — {taxInfo.label}</p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-semibold">Detalhamento — {taxInfo.label}</p>
+                  {Object.keys(taxOverrides).length > 0 && (
+                    <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => { setTaxOverrides({}); toast.success("Alíquotas restauradas!"); }}>
+                      <RotateCcw className="h-3 w-3" /> Restaurar
+                    </Button>
+                  )}
+                </div>
                 <div className="space-y-2">
                   {taxInfo.taxes.map(tax => {
                     const value = valorVenda * (tax.rate / 100);
+                    const isEditing = editingTax === tax.name;
+                    const isOverridden = taxOverrides[tax.name] !== undefined;
                     return (
-                      <div key={tax.name} className="flex items-center justify-between rounded-lg border p-3">
+                      <div key={tax.name} className={`flex items-center justify-between rounded-lg border p-3 ${isOverridden ? "border-primary/30 bg-primary/5" : ""}`}>
                         <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="font-mono w-16 justify-center">{tax.rate.toFixed(2)}%</Badge>
-                          <div><p className="text-sm font-semibold">{tax.name}</p><p className="text-xs text-muted-foreground">{tax.desc}</p></div>
+                          {isEditing ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editingTaxValue}
+                                onChange={e => setEditingTaxValue(e.target.value)}
+                                className="font-mono w-20 h-7 text-xs"
+                                autoFocus
+                                onKeyDown={e => {
+                                  if (e.key === "Enter") {
+                                    const val = parseFloat(editingTaxValue.replace(",", "."));
+                                    if (!isNaN(val) && val >= 0) {
+                                      setTaxOverrides(prev => ({ ...prev, [tax.name]: val }));
+                                      toast.success(`${tax.name} alterado para ${val.toFixed(2)}%`);
+                                    }
+                                    setEditingTax(null);
+                                  } else if (e.key === "Escape") {
+                                    setEditingTax(null);
+                                  }
+                                }}
+                              />
+                              <span className="text-xs text-muted-foreground">%</span>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => {
+                                const val = parseFloat(editingTaxValue.replace(",", "."));
+                                if (!isNaN(val) && val >= 0) {
+                                  setTaxOverrides(prev => ({ ...prev, [tax.name]: val }));
+                                  toast.success(`${tax.name} alterado para ${val.toFixed(2)}%`);
+                                }
+                                setEditingTax(null);
+                              }}>
+                                <Check className="h-3 w-3 text-success" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className={`font-mono w-16 justify-center cursor-pointer hover:bg-primary/10 transition-colors ${isOverridden ? "border-primary text-primary" : ""}`}
+                              onClick={() => { setEditingTax(tax.name); setEditingTaxValue(tax.rate.toFixed(2).replace(".", ",")); }}
+                            >
+                              {tax.rate.toFixed(2)}%
+                            </Badge>
+                          )}
+                          <div>
+                            <p className="text-sm font-semibold flex items-center gap-1">
+                              {tax.name}
+                              {!isEditing && (
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0 opacity-40 hover:opacity-100" onClick={() => { setEditingTax(tax.name); setEditingTaxValue(tax.rate.toFixed(2).replace(".", ",")); }}>
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{tax.desc}</p>
+                          </div>
                         </div>
                         <p className="font-mono font-semibold text-destructive">{fmt(value)}</p>
                       </div>
