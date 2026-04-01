@@ -136,20 +136,26 @@ const SimuladorPrecos = () => {
   let totalTaxValue: number;
   let simplesAliquotaEfetiva = 0;
 
+  const applyOverrides = (taxes: { name: string; rate: number; desc: string }[]) =>
+    taxes.map(t => ({ ...t, rate: taxOverrides[t.name] !== undefined ? taxOverrides[t.name] : t.rate }));
+
   if (regime === "lucro_presumido") {
     taxInfo = TAX_INFO_LP[nfModality];
+    taxInfo = { ...taxInfo, taxes: applyOverrides(taxInfo.taxes) };
     totalTaxRate = taxInfo.taxes.reduce((acc, t) => acc + t.rate, 0);
     totalTaxValue = valorVenda * (totalTaxRate / 100);
   } else {
     const fat = parseFloat(faturamentoAnual) || 360000;
     const faixa = SIMPLES_FAIXAS.find(f => fat <= f.ate) || SIMPLES_FAIXAS[SIMPLES_FAIXAS.length - 1];
     simplesAliquotaEfetiva = ((fat * (faixa.aliquota / 100)) - faixa.deducao) / fat * 100;
-    totalTaxRate = simplesAliquotaEfetiva;
+    const baseTaxes = [{ name: "DAS Unificado", rate: simplesAliquotaEfetiva, desc: `Alíquota efetiva (nominal ${faixa.aliquota}% - dedução ${fmt(faixa.deducao)})` }];
+    const adjustedTaxes = applyOverrides(baseTaxes);
+    totalTaxRate = adjustedTaxes.reduce((acc, t) => acc + t.rate, 0);
     totalTaxValue = valorVenda * (totalTaxRate / 100);
     taxInfo = {
       label: `Simples Nacional – ${TAX_SIMPLES[nfModality].label} (${faixa.label})`,
       icon: Receipt,
-      taxes: [{ name: "DAS Unificado", rate: simplesAliquotaEfetiva, desc: `Alíquota efetiva (nominal ${faixa.aliquota}% - dedução ${fmt(faixa.deducao)})` }],
+      taxes: adjustedTaxes,
     };
   }
 
