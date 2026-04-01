@@ -111,6 +111,9 @@ const SimuladorPrecos = () => {
   const [valorVendaCustom, setValorVendaCustom] = useState("");
   const [faturamentoAnual, setFaturamentoAnual] = useState("360000");
   const [comissao, setComissao] = useState("");
+  const [taxOverrides, setTaxOverrides] = useState<Record<string, number>>({});
+  const [editingTax, setEditingTax] = useState<string | null>(null);
+  const [editingTaxValue, setEditingTaxValue] = useState("");
 
   // Etiqueta generator
   const [etiquetaPrefix, setEtiquetaPrefix] = useState("DNA");
