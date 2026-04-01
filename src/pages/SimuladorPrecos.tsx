@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   DollarSign, Calculator, TrendingUp, Package, Receipt,
   Clock, AlertTriangle, Beaker, Skull, Baby, Users, Info, Scale,
-  Tag, Copy, Key,
+  Tag, Copy, Key, Pencil, Check, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -111,6 +111,9 @@ const SimuladorPrecos = () => {
   const [valorVendaCustom, setValorVendaCustom] = useState("");
   const [faturamentoAnual, setFaturamentoAnual] = useState("360000");
   const [comissao, setComissao] = useState("");
+  const [taxOverrides, setTaxOverrides] = useState<Record<string, number>>({});
+  const [editingTax, setEditingTax] = useState<string | null>(null);
+  const [editingTaxValue, setEditingTaxValue] = useState("");
 
   // Etiqueta generator
   const [etiquetaPrefix, setEtiquetaPrefix] = useState("DNA");
@@ -133,20 +136,26 @@ const SimuladorPrecos = () => {
   let totalTaxValue: number;
   let simplesAliquotaEfetiva = 0;
 
+  const applyOverrides = (taxes: { name: string; rate: number; desc: string }[]) =>
+    taxes.map(t => ({ ...t, rate: taxOverrides[t.name] !== undefined ? taxOverrides[t.name] : t.rate }));
+
   if (regime === "lucro_presumido") {
     taxInfo = TAX_INFO_LP[nfModality];
+    taxInfo = { ...taxInfo, taxes: applyOverrides(taxInfo.taxes) };
     totalTaxRate = taxInfo.taxes.reduce((acc, t) => acc + t.rate, 0);
     totalTaxValue = valorVenda * (totalTaxRate / 100);
   } else {
     const fat = parseFloat(faturamentoAnual) || 360000;
     const faixa = SIMPLES_FAIXAS.find(f => fat <= f.ate) || SIMPLES_FAIXAS[SIMPLES_FAIXAS.length - 1];
     simplesAliquotaEfetiva = ((fat * (faixa.aliquota / 100)) - faixa.deducao) / fat * 100;
-    totalTaxRate = simplesAliquotaEfetiva;
+    const baseTaxes = [{ name: "DAS Unificado", rate: simplesAliquotaEfetiva, desc: `Alíquota efetiva (nominal ${faixa.aliquota}% - dedução ${fmt(faixa.deducao)})` }];
+    const adjustedTaxes = applyOverrides(baseTaxes);
+    totalTaxRate = adjustedTaxes.reduce((acc, t) => acc + t.rate, 0);
     totalTaxValue = valorVenda * (totalTaxRate / 100);
     taxInfo = {
       label: `Simples Nacional – ${TAX_SIMPLES[nfModality].label} (${faixa.label})`,
       icon: Receipt,
-      taxes: [{ name: "DAS Unificado", rate: simplesAliquotaEfetiva, desc: `Alíquota efetiva (nominal ${faixa.aliquota}% - dedução ${fmt(faixa.deducao)})` }],
+      taxes: adjustedTaxes,
     };
   }
 
@@ -297,15 +306,74 @@ const SimuladorPrecos = () => {
               <Separator />
 
               <div>
-                <p className="text-sm font-semibold mb-3">Detalhamento — {taxInfo.label}</p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-semibold">Detalhamento — {taxInfo.label}</p>
+                  {Object.keys(taxOverrides).length > 0 && (
+                    <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => { setTaxOverrides({}); toast.success("Alíquotas restauradas!"); }}>
+                      <RotateCcw className="h-3 w-3" /> Restaurar
+                    </Button>
+                  )}
+                </div>
                 <div className="space-y-2">
                   {taxInfo.taxes.map(tax => {
                     const value = valorVenda * (tax.rate / 100);
+                    const isEditing = editingTax === tax.name;
+                    const isOverridden = taxOverrides[tax.name] !== undefined;
                     return (
-                      <div key={tax.name} className="flex items-center justify-between rounded-lg border p-3">
+                      <div key={tax.name} className={`flex items-center justify-between rounded-lg border p-3 ${isOverridden ? "border-primary/30 bg-primary/5" : ""}`}>
                         <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="font-mono w-16 justify-center">{tax.rate.toFixed(2)}%</Badge>
-                          <div><p className="text-sm font-semibold">{tax.name}</p><p className="text-xs text-muted-foreground">{tax.desc}</p></div>
+                          {isEditing ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={editingTaxValue}
+                                onChange={e => setEditingTaxValue(e.target.value)}
+                                className="font-mono w-20 h-7 text-xs"
+                                autoFocus
+                                onKeyDown={e => {
+                                  if (e.key === "Enter") {
+                                    const val = parseFloat(editingTaxValue.replace(",", "."));
+                                    if (!isNaN(val) && val >= 0) {
+                                      setTaxOverrides(prev => ({ ...prev, [tax.name]: val }));
+                                      toast.success(`${tax.name} alterado para ${val.toFixed(2)}%`);
+                                    }
+                                    setEditingTax(null);
+                                  } else if (e.key === "Escape") {
+                                    setEditingTax(null);
+                                  }
+                                }}
+                              />
+                              <span className="text-xs text-muted-foreground">%</span>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => {
+                                const val = parseFloat(editingTaxValue.replace(",", "."));
+                                if (!isNaN(val) && val >= 0) {
+                                  setTaxOverrides(prev => ({ ...prev, [tax.name]: val }));
+                                  toast.success(`${tax.name} alterado para ${val.toFixed(2)}%`);
+                                }
+                                setEditingTax(null);
+                              }}>
+                                <Check className="h-3 w-3 text-success" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className={`font-mono w-16 justify-center cursor-pointer hover:bg-primary/10 transition-colors ${isOverridden ? "border-primary text-primary" : ""}`}
+                              onClick={() => { setEditingTax(tax.name); setEditingTaxValue(tax.rate.toFixed(2).replace(".", ",")); }}
+                            >
+                              {tax.rate.toFixed(2)}%
+                            </Badge>
+                          )}
+                          <div>
+                            <p className="text-sm font-semibold flex items-center gap-1">
+                              {tax.name}
+                              {!isEditing && (
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0 opacity-40 hover:opacity-100" onClick={() => { setEditingTax(tax.name); setEditingTaxValue(tax.rate.toFixed(2).replace(".", ",")); }}>
+                                  <Pencil className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{tax.desc}</p>
+                          </div>
                         </div>
                         <p className="font-mono font-semibold text-destructive">{fmt(value)}</p>
                       </div>
