@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   DollarSign, Calculator, TrendingUp, Package, Receipt,
   Clock, AlertTriangle, Beaker, Skull, Baby, Users, Info, Scale,
-  Tag, Copy, Key,
+  Tag, Copy, Key, Pencil, Check, RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
