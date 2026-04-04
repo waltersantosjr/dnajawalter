@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Package, Home, Building2, CalendarCheck, ArrowRight, ArrowLeft,
-  Lock, Mail, Truck, MapPin, CheckCircle2, Info, ExternalLink, AlertTriangle
+  Lock, Mail, Truck, MapPin, CheckCircle2, Info, ExternalLink, AlertTriangle,
+  Printer, Calculator, Search
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,30 +47,56 @@ const CORREIOS_OPTIONS = [
     prazo: "1 a 3 dias úteis",
     descricao: "Envio rápido com rastreamento. Ideal para amostras biológicas.",
     destaque: true,
+    precoBase: 32.5,
   },
   {
     nome: "PAC",
     prazo: "5 a 8 dias úteis",
     descricao: "Opção econômica. Verifique se o prazo é compatível com a validade da amostra.",
     destaque: false,
+    precoBase: 18.9,
   },
   {
     nome: "SEDEX 10 / SEDEX 12",
     prazo: "Entrega até 10h ou 12h do dia seguinte",
     descricao: "Para envios urgentes com hora marcada.",
     destaque: false,
+    precoBase: 55.0,
   },
 ];
 
+const DEST_CEP = "01001-000";
+const DEST_CIDADE = "São Paulo/SP";
+
+const calcularFrete = (cepOrigem: string) => {
+  const cepNum = parseInt(cepOrigem.replace(/\D/g, ""));
+  if (isNaN(cepNum) || cepOrigem.replace(/\D/g, "").length < 8) return null;
+
+  // Simulação baseada na distância do CEP de destino (SP capital)
+  const destNum = 1001000;
+  const diff = Math.abs(cepNum - destNum);
+  const fator = 1 + (diff / 100000000) * 2.5;
+
+  return CORREIOS_OPTIONS.map((opt) => ({
+    servico: opt.nome,
+    prazo: opt.prazo,
+    valor: Math.round(opt.precoBase * fator * 100) / 100,
+    destaque: opt.destaque,
+  }));
+};
+
 const RetornoAmostras = () => {
   const [modalidade, setModalidade] = useState<Modalidade>(null);
-  const [step, setStep] = useState(0); // 0 = escolha, 1 = form, 2 = instruções
+  const [step, setStep] = useState(0);
   const [login, setLogin] = useState("");
   const [senha, setSenha] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [cep, setCep] = useState("");
   const [observacao, setObservacao] = useState("");
   const [solicitacaoEnviada, setSolicitacaoEnviada] = useState(false);
+  const [freteResult, setFreteResult] = useState<ReturnType<typeof calcularFrete>>(null);
+  const [calculandoFrete, setCalculandoFrete] = useState(false);
+  const etiquetaRef = useRef<HTMLDivElement>(null);
 
   const handleSelectModalidade = (m: Modalidade) => {
     setModalidade(m);
@@ -91,9 +118,83 @@ const RetornoAmostras = () => {
     toast.success("Kit autenticado com sucesso!");
   };
 
+  const handleCalcularFrete = () => {
+    const cepLimpo = cep.replace(/\D/g, "");
+    if (cepLimpo.length < 8) {
+      toast.error("Informe um CEP válido com 8 dígitos");
+      return;
+    }
+    setCalculandoFrete(true);
+    setTimeout(() => {
+      const result = calcularFrete(cep);
+      setFreteResult(result);
+      setCalculandoFrete(false);
+      if (result) toast.success("Frete calculado!");
+    }, 800);
+  };
+
   const handleSolicitar = () => {
     setSolicitacaoEnviada(true);
     toast.success("Solicitação de retorno registrada com sucesso!");
+  };
+
+  const handlePrintEtiqueta = () => {
+    const el = etiquetaRef.current;
+    if (!el) return;
+    const win = window.open("", "_blank", "width=600,height=500");
+    if (!win) return;
+    win.document.write(`
+      <html><head><title>Etiqueta de Postagem DNAjá</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .etiqueta { border: 3px solid #000; padding: 20px; max-width: 480px; margin: auto; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
+        .header h2 { margin: 0 0 4px; font-size: 18px; }
+        .header p { margin: 0; font-size: 11px; color: #555; }
+        .section { margin-bottom: 12px; }
+        .section-title { font-weight: bold; font-size: 11px; text-transform: uppercase; color: #555; margin-bottom: 4px; letter-spacing: 1px; }
+        .dest { font-size: 14px; line-height: 1.6; }
+        .dest .nome { font-weight: bold; font-size: 16px; }
+        .remet { font-size: 12px; line-height: 1.5; color: #333; }
+        .kit-info { display: flex; justify-content: space-between; border-top: 2px dashed #000; padding-top: 10px; margin-top: 12px; font-size: 12px; }
+        .kit-info .label { color: #555; font-size: 10px; text-transform: uppercase; }
+        .kit-info .value { font-weight: bold; font-size: 14px; font-family: monospace; }
+        .selo { text-align: center; margin-top: 16px; border: 2px solid #000; padding: 8px; font-weight: bold; font-size: 13px; background: #f0f0f0; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <div class="etiqueta">
+        <div class="header">
+          <h2>DNAjá — Etiqueta de Postagem Pré-Paga</h2>
+          <p>Recorte e cole na embalagem de retorno</p>
+        </div>
+        <div class="section">
+          <div class="section-title">Destinatário</div>
+          <div class="dest">
+            <div class="nome">Laboratório DNAjá — Biovida</div>
+            <div>Rua Exemplo, 123 — Sala 45</div>
+            <div>Centro — São Paulo/SP</div>
+            <div>CEP: ${DEST_CEP}</div>
+            <div style="font-size:11px;color:#555;">A/C: Setor de Triagem de Amostras</div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">Remetente</div>
+          <div class="remet">
+            <div>${login ? `Kit: ${login}` : "Cliente DNAjá"}</div>
+            <div>${cep ? `CEP Origem: ${cep}` : ""}</div>
+          </div>
+        </div>
+        <div class="kit-info">
+          <div><div class="label">ID do Kit</div><div class="value">${login || "—"}</div></div>
+          <div><div class="label">Modalidade</div><div class="value">${modalidade === "auto_coleta" ? "Auto Coleta" : modalidade === "unidade" ? "Unidade" : "Agendado"}</div></div>
+          <div><div class="label">Data</div><div class="value">${new Date().toLocaleDateString("pt-BR")}</div></div>
+        </div>
+        <div class="selo">✉ POSTAGEM PRÉ-PAGA — NÃO NECESSITA SELO</div>
+      </div>
+      <script>window.onload=function(){window.print();}</script>
+      </body></html>
+    `);
+    win.document.close();
   };
 
   const reset = () => {
@@ -105,6 +206,7 @@ const RetornoAmostras = () => {
     setCep("");
     setObservacao("");
     setSolicitacaoEnviada(false);
+    setFreteResult(null);
   };
 
   if (solicitacaoEnviada) {
@@ -279,13 +381,16 @@ const RetornoAmostras = () => {
                       </li>
                       <li className="flex gap-3">
                         <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">3</span>
-                        <span>
-                          Leve a uma agência dos <strong>Correios</strong> e envie via <strong>SEDEX</strong> (recomendado) 
-                          ou <strong>PAC</strong> para o endereço indicado na etiqueta de retorno.
-                        </span>
+                        <span>Imprima a <strong>etiqueta de postagem pré-paga</strong> e cole na embalagem.</span>
                       </li>
                       <li className="flex gap-3">
                         <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">4</span>
+                        <span>
+                          Leve a uma agência dos <strong>Correios</strong> e entregue o pacote já etiquetado.
+                        </span>
+                      </li>
+                      <li className="flex gap-3">
+                        <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">5</span>
                         <span>Guarde o comprovante de postagem e o código de rastreamento.</span>
                       </li>
                     </ol>
@@ -298,11 +403,66 @@ const RetornoAmostras = () => {
                     <div className="bg-muted/50 rounded-lg p-3 text-sm font-mono">
                       <p className="font-bold">Laboratório DNAjá — Biovida</p>
                       <p>Rua Exemplo, 123 — Sala 45</p>
-                      <p>Centro — São Paulo/SP</p>
-                      <p>CEP: 01001-000</p>
+                      <p>Centro — {DEST_CIDADE}</p>
+                      <p>CEP: {DEST_CEP}</p>
                       <p className="text-xs text-muted-foreground mt-1">A/C: Setor de Triagem de Amostras</p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Etiqueta de postagem pré-paga */}
+              <Card className="border-primary/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Printer className="h-5 w-5 text-primary" /> Etiqueta de Postagem Pré-Paga
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Imprima, recorte e cole na embalagem de retorno
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div ref={etiquetaRef} className="border-2 border-foreground/80 rounded-lg p-4 space-y-3 bg-card">
+                    <div className="text-center border-b-2 border-foreground/30 pb-2">
+                      <p className="font-bold text-base">DNAjá — Etiqueta de Postagem Pré-Paga</p>
+                      <p className="text-[10px] text-muted-foreground">Recorte e cole na embalagem</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Destinatário</p>
+                      <p className="font-bold text-sm">Laboratório DNAjá — Biovida</p>
+                      <p className="text-xs">Rua Exemplo, 123 — Sala 45</p>
+                      <p className="text-xs">Centro — {DEST_CIDADE}</p>
+                      <p className="text-xs">CEP: {DEST_CEP}</p>
+                      <p className="text-[10px] text-muted-foreground">A/C: Setor de Triagem de Amostras</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Remetente</p>
+                      <p className="text-xs">{login ? `Kit: ${login}` : "Cliente DNAjá"}</p>
+                      {cep && <p className="text-xs">CEP Origem: {cep}</p>}
+                    </div>
+                    <div className="flex justify-between border-t border-dashed border-foreground/30 pt-2 text-xs">
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase">ID do Kit</p>
+                        <p className="font-mono font-bold">{login || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase">Modalidade</p>
+                        <p className="font-mono font-bold">
+                          {modalidade === "auto_coleta" ? "Auto Coleta" : modalidade === "unidade" ? "Unidade" : "Agendado"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-muted-foreground uppercase">Data</p>
+                        <p className="font-mono font-bold">{new Date().toLocaleDateString("pt-BR")}</p>
+                      </div>
+                    </div>
+                    <div className="text-center border-2 border-foreground/50 rounded p-2 bg-muted/30 font-bold text-xs">
+                      ✉ POSTAGEM PRÉ-PAGA — NÃO NECESSITA SELO
+                    </div>
+                  </div>
+                  <Button onClick={handlePrintEtiqueta} className="w-full">
+                    <Printer className="mr-2 h-4 w-4" /> Imprimir Etiqueta
+                  </Button>
                 </CardContent>
               </Card>
 
@@ -350,7 +510,7 @@ const RetornoAmostras = () => {
               </Card>
             </div>
 
-            {/* Sidebar: Formulário */}
+            {/* Sidebar */}
             <div className="space-y-4">
               {login && (
                 <Card className="border-success/30">
@@ -364,6 +524,77 @@ const RetornoAmostras = () => {
                 </Card>
               )}
 
+              {/* Calculadora de frete */}
+              <Card className="border-info/30">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Calculator className="h-4 w-4 text-info" /> Calculadora de Frete
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Simule o valor do envio pelos Correios
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold">CEP de origem</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={cep}
+                        onChange={(e) => {
+                          let v = e.target.value.replace(/\D/g, "").slice(0, 8);
+                          if (v.length > 5) v = v.slice(0, 5) + "-" + v.slice(5);
+                          setCep(v);
+                        }}
+                        placeholder="00000-000"
+                        className="font-mono"
+                        maxLength={9}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleCalcularFrete}
+                        disabled={calculandoFrete}
+                        className="shrink-0"
+                      >
+                        {calculandoFrete ? (
+                          <span className="animate-spin h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full" />
+                        ) : (
+                          <Search className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    <span>Destino: {DEST_CEP} — {DEST_CIDADE}</span>
+                  </div>
+
+                  {freteResult && (
+                    <div className="space-y-2 border-t pt-3">
+                      {freteResult.map((f) => (
+                        <div
+                          key={f.servico}
+                          className={`flex items-center justify-between p-2 rounded-lg border text-xs ${
+                            f.destaque ? "border-success/40 bg-success/5" : "border-border"
+                          }`}
+                        >
+                          <div>
+                            <span className="font-semibold">{f.servico}</span>
+                            <p className="text-[10px] text-muted-foreground">{f.prazo}</p>
+                          </div>
+                          <span className="font-bold text-sm">
+                            R$ {f.valor.toFixed(2).replace(".", ",")}
+                          </span>
+                        </div>
+                      ))}
+                      <p className="text-[10px] text-muted-foreground italic">
+                        * Valores simulados. Consulte os Correios para valores exatos.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm">Solicitar Atendimento</CardTitle>
@@ -372,16 +603,6 @@ const RetornoAmostras = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">CEP de origem</Label>
-                    <Input
-                      value={cep}
-                      onChange={(e) => setCep(e.target.value)}
-                      placeholder="00000-000"
-                      className="font-mono"
-                      maxLength={9}
-                    />
-                  </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold">Observações (opcional)</Label>
                     <Textarea
@@ -402,7 +623,7 @@ const RetornoAmostras = () => {
                 <p className="font-semibold flex items-center gap-1">
                   <Info className="h-3 w-3" /> Dúvidas frequentes
                 </p>
-                <p>• O envio é por conta do cliente, exceto em promoções específicas.</p>
+                <p>• Com a etiqueta pré-paga, basta entregar na agência dos Correios.</p>
                 <p>• Não envie amostras por transportadoras não autorizadas.</p>
                 <p>• O prazo do resultado começa a contar após o recebimento no laboratório.</p>
               </div>
