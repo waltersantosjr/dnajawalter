@@ -2,7 +2,7 @@ import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
   Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap,
-  Building2, ShieldCheck } from
+  Building2, ShieldCheck, Package } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
   { title: "Etiquetas", url: "/etiquetas", icon: Barcode, roles: ["admin", "coletor"] },
   { title: "IPM", url: "/ipm", icon: ClipboardList, roles: ["admin", "coletor"] },
+  { title: "Retorno Amostras", url: "/retorno-amostras", icon: Package, roles: ["admin", "coletor", "triagem"] },
   
   { title: "Profissionais", url: "/profissionais", icon: ShieldCheck, roles: ["admin"] },
   { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
@@ -45,6 +46,7 @@ const ICON_COLORS: Record<string, string> = {
   "Calculadora DNAjá": "text-success",
   "Etiquetas": "text-chart-4",
   "IPM": "text-destructive",
+  "Retorno Amostras": "text-chart-4",
   "Portal Credenciado": "text-primary",
   "Profissionais": "text-chart-3",
   "CRM Comercial": "text-chart-3",

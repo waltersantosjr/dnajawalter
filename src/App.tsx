@@ -23,6 +23,7 @@ import JornadaDNA from "./pages/JornadaDNA";
 import IPM from "./pages/IPM";
 import GeradorEtiquetas from "./pages/GeradorEtiquetas";
 import Profissionais from "./pages/Profissionais";
+import RetornoAmostras from "./pages/RetornoAmostras";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/ipm" element={<IPM />} />
               <Route path="/etiquetas" element={<GeradorEtiquetas />} />
               <Route path="/profissionais" element={<Profissionais />} />
+              <Route path="/retorno-amostras" element={<RetornoAmostras />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
