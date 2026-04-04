@@ -55,6 +55,7 @@ const App = () => (
               <Route path="/ipm" element={<IPM />} />
               <Route path="/etiquetas" element={<GeradorEtiquetas />} />
               <Route path="/profissionais" element={<Profissionais />} />
+              <Route path="/retorno-amostras" element={<RetornoAmostras />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

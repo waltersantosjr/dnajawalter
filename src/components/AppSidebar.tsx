@@ -46,6 +46,7 @@ const ICON_COLORS: Record<string, string> = {
   "Calculadora DNAjá": "text-success",
   "Etiquetas": "text-chart-4",
   "IPM": "text-destructive",
+  "Retorno Amostras": "text-chart-4",
   "Portal Credenciado": "text-primary",
   "Profissionais": "text-chart-3",
   "CRM Comercial": "text-chart-3",
