@@ -23,6 +23,7 @@ import JornadaDNA from "./pages/JornadaDNA";
 import IPM from "./pages/IPM";
 import GeradorEtiquetas from "./pages/GeradorEtiquetas";
 import Profissionais from "./pages/Profissionais";
+import RetornoAmostras from "./pages/RetornoAmostras";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
