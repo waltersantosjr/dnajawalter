@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { title: "Calculadora DNAjá", url: "/simulador-precos", icon: Calculator, roles: ["admin"] },
   { title: "Etiquetas", url: "/etiquetas", icon: Barcode, roles: ["admin", "coletor"] },
   { title: "IPM", url: "/ipm", icon: ClipboardList, roles: ["admin", "coletor"] },
+  { title: "Retorno Amostras", url: "/retorno-amostras", icon: Package, roles: ["admin", "coletor", "triagem"] },
   
   { title: "Profissionais", url: "/profissionais", icon: ShieldCheck, roles: ["admin"] },
   { title: "CRM Comercial", url: "/crm", icon: Briefcase, roles: ["admin"] },
