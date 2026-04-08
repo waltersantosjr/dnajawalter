@@ -118,7 +118,7 @@ const SimuladorPrecos = () => {
   const [modalidade, setModalidade] = useState<Modalidade>("duo_4d");
   const [nfModality, setNfModality] = useState<NfModality>("servico");
   const [regime, setRegime] = useState<RegimeTrib>("lucro_presumido");
-  const [qtdFilhos, setQtdFilhos] = useState("1");
+  const [canalVenda, setCanalVenda] = useState<CanalVenda>("loja");
   const [valorTerceirizado, setValorTerceirizado] = useState("");
   const [valorKit, setValorKit] = useState("");
   const [valorVendaCustom, setValorVendaCustom] = useState("");
@@ -129,14 +129,14 @@ const SimuladorPrecos = () => {
   const [editingTaxValue, setEditingTaxValue] = useState("");
 
   const exam = TABELA[modalidade];
-  const filhos = Math.max(parseInt(qtdFilhos) || 1, 1);
-  const acrescimoTotal = exam.acrescimo * Math.max(filhos - 1, 0);
-  const valorTabela = exam.valorBase + acrescimoTotal;
+  const canal = CANAIS[canalVenda];
+  const valorTabela = exam.valorBase;
   const valorVenda = valorVendaCustom ? parseFloat(valorVendaCustom.replace(",", ".")) || valorTabela : valorTabela;
   const custoTerc = valorTerceirizado ? parseFloat(valorTerceirizado.replace(",", ".")) || 0 : 0;
   const custoKit = valorKit ? parseFloat(valorKit.replace(",", ".")) || 0 : 0;
   const comissaoVal = comissao ? parseFloat(comissao.replace(",", ".")) || 0 : 0;
-  const custoTotal = custoTerc + custoKit + comissaoVal;
+  const custoLogistica = canal.logistica;
+  const custoTotal = custoTerc + custoKit + comissaoVal + custoLogistica;
 
   let taxInfo: TaxInfo;
   let totalTaxRate: number;
