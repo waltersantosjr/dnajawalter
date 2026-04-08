@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   DollarSign, Calculator, TrendingUp, Package, Receipt,
   Clock, AlertTriangle, Beaker, Skull, Baby, Users, Info, Scale,
-  Tag, Copy, Key, Pencil, Check, RotateCcw,
+  Pencil, Check, RotateCcw, Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,21 +24,22 @@ interface ExamRow {
   acrescimoLabel: string;
   icon: React.ElementType;
   obs?: string;
+  color: string;
 }
 
 const TABELA: Record<Modalidade, ExamRow> = {
-  duo_4d: { label: "Duo/Trio – 04 dias úteis", grupo: "Paternidade / Maternidade", entrega: "04 dias úteis", valorBase: 180, acrescimo: 80, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Baby },
-  duo_48h: { label: "Duo/Trio – 48h Urgência", grupo: "Paternidade / Maternidade", entrega: "48 horas (Urgência)", valorBase: 495, acrescimo: 160, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Clock },
-  duo_24h: { label: "Duo/Trio – 24h Emergência", grupo: "Paternidade / Maternidade", entrega: "24 horas (Emergência)", valorBase: 895, acrescimo: 320, acrescimoLabel: "por filho investigante (mesma mãe)", icon: AlertTriangle },
-  rec_mae_pai: { label: "Reconstituição – Mãe e Pai (Avós)", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 600, acrescimo: 150, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users, obs: "Padrão Ouro." },
-  rec_3par: { label: "Reconstituição – 3 Parentes 1º Grau", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 999, acrescimo: 350, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users },
-  rec_2par: { label: "Reconstituição – 2 Parentes 1º Grau", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 999, acrescimo: 350, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users },
-  rec_1par: { label: "Reconstituição – 1 Parente 1º Grau", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 999, acrescimo: 350, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users },
-  post_mortem: { label: "Investigação Post Mortem", grupo: "Post Mortem", entrega: "30 dias", valorBase: 7900, acrescimo: 2000, acrescimoLabel: "por filho investigante", icon: Skull, obs: "Fêmur ou 5 dentes. Requer autorização judicial." },
-  dnaja: { label: "DNAjá – Kit Auto Coleta", grupo: "DNAjá", entrega: "5 dias úteis", valorBase: 299.9, acrescimo: 0, acrescimoLabel: "—", icon: Package, obs: "Apenas informativo." },
+  duo_4d: { label: "Duo/Trio – 04 dias úteis", grupo: "Paternidade / Maternidade", entrega: "04 dias úteis", valorBase: 180, acrescimo: 80, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Baby, color: "border-success/40 bg-success/5 hover:bg-success/10" },
+  duo_48h: { label: "Duo/Trio – 48h Urgência", grupo: "Paternidade / Maternidade", entrega: "48 horas (Urgência)", valorBase: 495, acrescimo: 160, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Clock, color: "border-warning/40 bg-warning/5 hover:bg-warning/10" },
+  duo_24h: { label: "Duo/Trio – 24h Emergência", grupo: "Paternidade / Maternidade", entrega: "24 horas (Emergência)", valorBase: 895, acrescimo: 320, acrescimoLabel: "por filho investigante (mesma mãe)", icon: AlertTriangle, color: "border-destructive/40 bg-destructive/5 hover:bg-destructive/10" },
+  rec_mae_pai: { label: "Reconstituição – Mãe e Pai (Avós)", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 600, acrescimo: 150, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users, obs: "Padrão Ouro.", color: "border-primary/40 bg-primary/5 hover:bg-primary/10" },
+  rec_3par: { label: "Reconstituição – 3 Parentes 1º Grau", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 999, acrescimo: 350, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users, color: "border-primary/40 bg-primary/5 hover:bg-primary/10" },
+  rec_2par: { label: "Reconstituição – 2 Parentes 1º Grau", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 999, acrescimo: 350, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users, color: "border-primary/40 bg-primary/5 hover:bg-primary/10" },
+  rec_1par: { label: "Reconstituição – 1 Parente 1º Grau", grupo: "Reconstituição Genética", entrega: "10 dias úteis", valorBase: 999, acrescimo: 350, acrescimoLabel: "por filho investigante (mesma mãe)", icon: Users, color: "border-primary/40 bg-primary/5 hover:bg-primary/10" },
+  post_mortem: { label: "Investigação Post Mortem", grupo: "Post Mortem", entrega: "30 dias", valorBase: 7900, acrescimo: 2000, acrescimoLabel: "por filho investigante", icon: Skull, obs: "Fêmur ou 5 dentes. Requer autorização judicial.", color: "border-chart-4/40 bg-chart-4/5 hover:bg-chart-4/10" },
+  dnaja: { label: "DNAjá – Kit Auto Coleta", grupo: "DNAjá", entrega: "5 dias úteis", valorBase: 299.9, acrescimo: 0, acrescimoLabel: "—", icon: Package, obs: "Apenas informativo.", color: "border-info/40 bg-info/5 hover:bg-info/10" },
 };
 
-type RegimeTrib = "lucro_presumido" | "simples_nacional";
+type RegimeTrib = "lucro_presumido" | "simples_nacional" | "gralab";
 type NfModality = "servico" | "produto" | "ecommerce";
 
 interface TaxInfo {
@@ -96,11 +97,6 @@ const SIMPLES_FAIXAS = [
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const generatePassword = () => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
-  return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-};
-
 const SimuladorPrecos = () => {
   const [modalidade, setModalidade] = useState<Modalidade>("duo_4d");
   const [nfModality, setNfModality] = useState<NfModality>("servico");
@@ -114,12 +110,6 @@ const SimuladorPrecos = () => {
   const [taxOverrides, setTaxOverrides] = useState<Record<string, number>>({});
   const [editingTax, setEditingTax] = useState<string | null>(null);
   const [editingTaxValue, setEditingTaxValue] = useState("");
-
-  // Etiqueta generator
-  const [etiquetaPrefix, setEtiquetaPrefix] = useState("DNA");
-  const [etiquetaStart, setEtiquetaStart] = useState("1");
-  const [etiquetaQtd, setEtiquetaQtd] = useState("10");
-  const [generatedLabels, setGeneratedLabels] = useState<{ etiqueta: string; login: string; senha: string }[]>([]);
 
   const exam = TABELA[modalidade];
   const filhos = Math.max(parseInt(qtdFilhos) || 1, 1);
@@ -139,7 +129,17 @@ const SimuladorPrecos = () => {
   const applyOverrides = (taxes: { name: string; rate: number; desc: string }[]) =>
     taxes.map(t => ({ ...t, rate: taxOverrides[t.name] !== undefined ? taxOverrides[t.name] : t.rate }));
 
-  if (regime === "lucro_presumido") {
+  if (regime === "gralab") {
+    const baseTaxes = [{ name: "GRALAB Unificado", rate: 18.0, desc: "Alíquota unificada GRALAB — todos os impostos consolidados em 18%" }];
+    const adjustedTaxes = applyOverrides(baseTaxes);
+    totalTaxRate = adjustedTaxes.reduce((acc, t) => acc + t.rate, 0);
+    totalTaxValue = valorVenda * (totalTaxRate / 100);
+    taxInfo = {
+      label: "GRALAB — Imposto Unificado 18%",
+      icon: Shield,
+      taxes: adjustedTaxes,
+    };
+  } else if (regime === "lucro_presumido") {
     taxInfo = TAX_INFO_LP[nfModality];
     taxInfo = { ...taxInfo, taxes: applyOverrides(taxInfo.taxes) };
     totalTaxRate = taxInfo.taxes.reduce((acc, t) => acc + t.rate, 0);
@@ -165,23 +165,18 @@ const SimuladorPrecos = () => {
   const taxValueReforma = valorVenda * (aliquotaReforma / 100);
   const lucroReforma = valorVenda - taxValueReforma - custoTotal;
 
-  const gerarEtiquetas = () => {
-    const start = parseInt(etiquetaStart) || 1;
-    const qtd = Math.min(parseInt(etiquetaQtd) || 10, 100);
-    const labels = Array.from({ length: qtd }, (_, i) => ({
-      etiqueta: `${etiquetaPrefix}${String(start + i).padStart(4, "0")}`,
-      login: `${etiquetaPrefix.toLowerCase()}${String(start + i).padStart(4, "0")}`,
-      senha: generatePassword(),
-    }));
-    setGeneratedLabels(labels);
-    toast.success(`${qtd} etiquetas geradas com login e senha!`);
-  };
+  // Group exams by grupo
+  const grupos = Object.entries(TABELA).reduce((acc, [key, row]) => {
+    if (!acc[row.grupo]) acc[row.grupo] = [];
+    acc[row.grupo].push({ key: key as Modalidade, ...row });
+    return acc;
+  }, {} as Record<string, (ExamRow & { key: Modalidade })[]>);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2"><Calculator className="h-7 w-7 text-success" /> Calculadora DNAjá</h1>
-        <p className="text-muted-foreground">Tabela comercial · Custos · Impostos · Gerador de Etiquetas</p>
+        <p className="text-muted-foreground">Tabela comercial · Custos · Impostos</p>
       </div>
 
       <div className="rounded-lg border border-info/20 bg-info/5 p-4">
@@ -195,29 +190,49 @@ const SimuladorPrecos = () => {
         </div>
       </div>
 
+      {/* Exam Cards Selection */}
+      <div className="space-y-4">
+        {Object.entries(grupos).map(([grupo, exams]) => (
+          <div key={grupo}>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide mb-2">{grupo}</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {exams.map(ex => {
+                const isActive = ex.key === modalidade;
+                const Icon = ex.icon;
+                return (
+                  <button
+                    key={ex.key}
+                    onClick={() => { setModalidade(ex.key); setValorVendaCustom(""); }}
+                    className={`rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.01] ${isActive ? `${ex.color} border-2 shadow-md ring-2 ring-primary/20` : "border-border bg-card hover:bg-muted/30"}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`rounded-lg p-2 ${isActive ? "bg-primary/10" : "bg-muted"}`}>
+                        <Icon className={`h-5 w-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold text-sm truncate ${isActive ? "text-primary" : ""}`}>{ex.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{ex.entrega}</p>
+                        <div className="flex items-baseline gap-2 mt-1">
+                          <span className="font-bold font-mono text-base">{fmt(ex.valorBase)}</span>
+                          {ex.acrescimo > 0 && <span className="text-[10px] text-muted-foreground">+{fmt(ex.acrescimo)}/filho</span>}
+                        </div>
+                      </div>
+                    </div>
+                    {ex.obs && <p className="text-[10px] text-muted-foreground mt-2 bg-muted/50 rounded px-2 py-1">{ex.obs}</p>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Config */}
         <div className="lg:col-span-1 space-y-4">
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">Modalidade do Exame</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base">Configuração</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <Select value={modalidade} onValueChange={v => { setModalidade(v as Modalidade); setValorVendaCustom(""); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="duo_4d">Duo/Trio – 04 dias</SelectItem>
-                  <SelectItem value="duo_48h">Duo/Trio – 48h</SelectItem>
-                  <SelectItem value="duo_24h">Duo/Trio – 24h</SelectItem>
-                  <Separator className="my-1" />
-                  <SelectItem value="rec_mae_pai">Reconstituição – Avós</SelectItem>
-                  <SelectItem value="rec_3par">Reconstituição – 3 Parentes</SelectItem>
-                  <SelectItem value="rec_2par">Reconstituição – 2 Parentes</SelectItem>
-                  <SelectItem value="rec_1par">Reconstituição – 1 Parente</SelectItem>
-                  <Separator className="my-1" />
-                  <SelectItem value="post_mortem">Post Mortem</SelectItem>
-                  <SelectItem value="dnaja">DNAjá Kit</SelectItem>
-                </SelectContent>
-              </Select>
-              {exam.obs && <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md">{exam.obs}</p>}
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Qtd. Filhos Investigantes</Label>
                 <Input type="number" min="1" value={qtdFilhos} onChange={e => setQtdFilhos(e.target.value)} className="font-mono" />
@@ -239,26 +254,42 @@ const SimuladorPrecos = () => {
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Scale className="h-4 w-4 text-primary" /> Regime Tributário</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <Select value={regime} onValueChange={v => setRegime(v as RegimeTrib)}>
+              <Select value={regime} onValueChange={v => { setRegime(v as RegimeTrib); setTaxOverrides({}); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
                   <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
+                  <SelectItem value="gralab">
+                    <span className="flex items-center gap-2">
+                      <Shield className="h-3.5 w-3.5 text-chart-4" /> GRALAB — Unificado 18%
+                    </span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
-              {/* NF Modality - always visible */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Tipo de Nota Fiscal</Label>
-                <Select value={nfModality} onValueChange={v => setNfModality(v as NfModality)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="servico">NF Serviço (Saúde)</SelectItem>
-                    <SelectItem value="produto">NF Produto (ICMS)</SelectItem>
-                    <SelectItem value="ecommerce">NF E-commerce</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {regime === "gralab" && (
+                <div className="rounded-lg border border-chart-4/30 bg-chart-4/5 p-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Shield className="h-4 w-4 text-chart-4" />
+                    <p className="text-sm font-bold text-chart-4">GRALAB</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Todos os impostos consolidados em uma única alíquota de <strong>18%</strong>.</p>
+                </div>
+              )}
+
+              {regime !== "gralab" && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">Tipo de Nota Fiscal</Label>
+                  <Select value={nfModality} onValueChange={v => setNfModality(v as NfModality)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="servico">NF Serviço (Saúde)</SelectItem>
+                      <SelectItem value="produto">NF Produto (ICMS)</SelectItem>
+                      <SelectItem value="ecommerce">NF E-commerce</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {regime === "simples_nacional" && (
                 <div className="space-y-1.5">
@@ -382,7 +413,7 @@ const SimuladorPrecos = () => {
                 </div>
               </div>
 
-              {nfModality === "servico" && (
+              {nfModality === "servico" && regime !== "gralab" && (
                 <>
                   <Separator />
                   <div className="rounded-lg border border-success/30 bg-success/5 p-4 space-y-2">
@@ -396,69 +427,6 @@ const SimuladorPrecos = () => {
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Gerador de Etiquetas */}
-          <Card className="border-chart-4/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Tag className="h-5 w-5 text-chart-4" /> Gerador de Etiquetas DNAjá</CardTitle>
-              <CardDescription>Gere etiquetas vinculadas a login e senha de acesso ao resultado</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="space-y-1.5"><Label className="text-xs font-semibold">Prefixo</Label><Input value={etiquetaPrefix} onChange={e => setEtiquetaPrefix(e.target.value)} className="font-mono" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-semibold">Início</Label><Input type="number" value={etiquetaStart} onChange={e => setEtiquetaStart(e.target.value)} className="font-mono" /></div>
-                <div className="space-y-1.5"><Label className="text-xs font-semibold">Quantidade</Label><Input type="number" min="1" max="100" value={etiquetaQtd} onChange={e => setEtiquetaQtd(e.target.value)} className="font-mono" /></div>
-              </div>
-              <Button onClick={gerarEtiquetas} className="w-full"><Key className="mr-2 h-4 w-4" /> Gerar Etiquetas com Login/Senha</Button>
-
-              {generatedLabels.length > 0 && (
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  <div className="grid grid-cols-3 gap-2 text-xs font-semibold text-muted-foreground border-b pb-2">
-                    <span>Etiqueta</span><span>Login</span><span>Senha</span>
-                  </div>
-                  {generatedLabels.map((l, i) => (
-                    <div key={i} className="grid grid-cols-3 gap-2 text-sm rounded-md border p-2 hover:bg-muted/30">
-                      <span className="font-mono font-bold text-chart-4">{l.etiqueta}</span>
-                      <span className="font-mono text-muted-foreground">{l.login}</span>
-                      <div className="flex items-center gap-1">
-                        <span className="font-mono">{l.senha}</span>
-                        <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => { navigator.clipboard.writeText(l.senha); toast.success("Senha copiada!"); }}>
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Tabela Comercial */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2"><Package className="h-4 w-4 text-chart-4" /> Tabela Comercial</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b"><th className="py-2 pr-3 text-left font-semibold">Modalidade</th><th className="py-2 pr-3 text-left font-semibold">Entrega</th><th className="py-2 pr-3 text-right font-semibold">Base</th><th className="py-2 text-right font-semibold">Acréscimo</th></tr></thead>
-                  <tbody>
-                    {Object.entries(TABELA).map(([key, row]) => {
-                      const isActive = key === modalidade;
-                      return (
-                        <tr key={key} className={`border-b last:border-0 cursor-pointer transition-colors ${isActive ? "bg-primary/5 font-semibold" : "hover:bg-muted/30"}`} onClick={() => { setModalidade(key as Modalidade); setValorVendaCustom(""); }}>
-                          <td className="py-2.5 pr-3"><div className="flex items-center gap-2">{isActive && <div className="h-2 w-2 rounded-full bg-primary" />}<span className={isActive ? "text-primary" : ""}>{row.label}</span></div></td>
-                          <td className="py-2.5 pr-3 text-muted-foreground">{row.entrega}</td>
-                          <td className="py-2.5 pr-3 text-right font-mono">{fmt(row.valorBase)}</td>
-                          <td className="py-2.5 text-right font-mono">{row.acrescimo > 0 ? fmt(row.acrescimo) : "—"}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
             </CardContent>
           </Card>
         </div>
