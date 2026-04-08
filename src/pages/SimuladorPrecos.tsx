@@ -247,13 +247,28 @@ const SimuladorPrecos = () => {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Config */}
         <div className="lg:col-span-1 space-y-4">
+          {/* Canal de Venda */}
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">Configuração</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Qtd. Filhos Investigantes</Label>
-                <Input type="number" min="1" value={qtdFilhos} onChange={e => setQtdFilhos(e.target.value)} className="font-mono" />
-              </div>
+            <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Store className="h-4 w-4 text-primary" /> Canal de Venda</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              {(Object.entries(CANAIS) as [CanalVenda, CanalInfo][]).map(([key, c]) => {
+                const isActive = key === canalVenda;
+                const Icon = c.icon;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setCanalVenda(key)}
+                    className={`w-full rounded-lg border p-3 text-left transition-all flex items-center gap-3 ${isActive ? `${c.color} border-2 shadow-sm` : "border-border hover:bg-muted/30"}`}
+                  >
+                    <Icon className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-semibold ${isActive ? "text-primary" : ""}`}>{c.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{c.logisticaLabel}</p>
+                    </div>
+                    {c.logistica > 0 && <span className="text-xs font-mono text-muted-foreground">{fmt(c.logistica)}</span>}
+                  </button>
+                );
+              })}
             </CardContent>
           </Card>
 
@@ -264,6 +279,7 @@ const SimuladorPrecos = () => {
               <div className="space-y-1.5"><Label className="text-xs font-semibold">Valor do Kit</Label><Input value={valorKit} onChange={e => setValorKit(e.target.value)} placeholder="0,00" className="font-mono" /></div>
               <div className="space-y-1.5"><Label className="text-xs font-semibold">Comissão</Label><Input value={comissao} onChange={e => setComissao(e.target.value)} placeholder="0,00" className="font-mono" /></div>
               <Separator />
+              <div className="flex justify-between text-xs text-muted-foreground"><span className="flex items-center gap-1"><Truck className="h-3 w-3" /> Logística ({canal.label})</span><span className="font-mono">{fmt(custoLogistica)}</span></div>
               <div className="flex justify-between text-sm font-semibold"><span>Custo Total</span><span className="font-mono text-warning">{fmt(custoTotal)}</span></div>
             </CardContent>
           </Card>
