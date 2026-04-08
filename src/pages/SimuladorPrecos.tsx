@@ -360,7 +360,8 @@ const SimuladorPrecos = () => {
                 <div className="space-y-2">
                   <p className="text-sm font-semibold">Composição</p>
                   <div className="flex h-8 w-full overflow-hidden rounded-full">
-                    {custoTotal > 0 && <div className="bg-warning flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${(custoTotal / valorVenda * 100).toFixed(1)}%` }}>Custo</div>}
+                    {(custoTerc + custoKit + comissaoVal) > 0 && <div className="bg-warning flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${((custoTerc + custoKit + comissaoVal) / valorVenda * 100).toFixed(1)}%` }}>Custo</div>}
+                    {custoLogistica > 0 && <div className="bg-info flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${(custoLogistica / valorVenda * 100).toFixed(1)}%` }}>Logística</div>}
                     <div className="bg-destructive flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${(totalTaxValue / valorVenda * 100).toFixed(1)}%` }}>Impostos</div>
                     <div className={`flex items-center justify-center text-xs font-semibold text-white ${lucroLiquido >= 0 ? "bg-success" : "bg-destructive/60"}`} style={{ width: `${Math.max((Math.max(lucroLiquido, 0) / valorVenda) * 100, 0).toFixed(1)}%` }}>Lucro</div>
                   </div>
