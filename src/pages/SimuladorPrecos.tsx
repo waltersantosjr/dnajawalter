@@ -9,9 +9,26 @@ import { Separator } from "@/components/ui/separator";
 import {
   DollarSign, Calculator, TrendingUp, Package, Receipt,
   Clock, AlertTriangle, Beaker, Skull, Baby, Users, Info, Scale,
-  Pencil, Check, RotateCcw, Shield,
+  Pencil, Check, RotateCcw, Shield, Store, Globe, Building2, Truck,
 } from "lucide-react";
 import { toast } from "sonner";
+
+type CanalVenda = "loja" | "credenciado" | "ecommerce_canal" | "judicial";
+
+interface CanalInfo {
+  label: string;
+  icon: React.ElementType;
+  logistica: number;
+  logisticaLabel: string;
+  color: string;
+}
+
+const CANAIS: Record<CanalVenda, CanalInfo> = {
+  loja: { label: "Loja Própria", icon: Store, logistica: 0, logisticaLabel: "Sem custo logístico", color: "border-success/40 bg-success/5" },
+  credenciado: { label: "Credenciado / Parceiro", icon: Building2, logistica: 15, logisticaLabel: "Envio kit + retorno amostra", color: "border-primary/40 bg-primary/5" },
+  ecommerce_canal: { label: "E-commerce / Online", icon: Globe, logistica: 28, logisticaLabel: "SEDEX ida + volta", color: "border-info/40 bg-info/5" },
+  judicial: { label: "Judicial / Fórum", icon: Scale, logistica: 35, logisticaLabel: "Logística + deslocamento coletor", color: "border-warning/40 bg-warning/5" },
+};
 
 type Modalidade = "duo_4d" | "duo_48h" | "duo_24h" | "rec_mae_pai" | "rec_3par" | "rec_2par" | "rec_1par" | "post_mortem" | "dnaja";
 
