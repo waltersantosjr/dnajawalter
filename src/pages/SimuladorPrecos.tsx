@@ -9,9 +9,26 @@ import { Separator } from "@/components/ui/separator";
 import {
   DollarSign, Calculator, TrendingUp, Package, Receipt,
   Clock, AlertTriangle, Beaker, Skull, Baby, Users, Info, Scale,
-  Pencil, Check, RotateCcw, Shield,
+  Pencil, Check, RotateCcw, Shield, Store, Globe, Building2, Truck,
 } from "lucide-react";
 import { toast } from "sonner";
+
+type CanalVenda = "loja" | "credenciado" | "ecommerce_canal" | "judicial";
+
+interface CanalInfo {
+  label: string;
+  icon: React.ElementType;
+  logistica: number;
+  logisticaLabel: string;
+  color: string;
+}
+
+const CANAIS: Record<CanalVenda, CanalInfo> = {
+  loja: { label: "Loja Própria", icon: Store, logistica: 0, logisticaLabel: "Sem custo logístico", color: "border-success/40 bg-success/5" },
+  credenciado: { label: "Credenciado / Parceiro", icon: Building2, logistica: 15, logisticaLabel: "Envio kit + retorno amostra", color: "border-primary/40 bg-primary/5" },
+  ecommerce_canal: { label: "E-commerce / Online", icon: Globe, logistica: 28, logisticaLabel: "SEDEX ida + volta", color: "border-info/40 bg-info/5" },
+  judicial: { label: "Judicial / Fórum", icon: Scale, logistica: 35, logisticaLabel: "Logística + deslocamento coletor", color: "border-warning/40 bg-warning/5" },
+};
 
 type Modalidade = "duo_4d" | "duo_48h" | "duo_24h" | "rec_mae_pai" | "rec_3par" | "rec_2par" | "rec_1par" | "post_mortem" | "dnaja";
 
@@ -101,7 +118,7 @@ const SimuladorPrecos = () => {
   const [modalidade, setModalidade] = useState<Modalidade>("duo_4d");
   const [nfModality, setNfModality] = useState<NfModality>("servico");
   const [regime, setRegime] = useState<RegimeTrib>("lucro_presumido");
-  const [qtdFilhos, setQtdFilhos] = useState("1");
+  const [canalVenda, setCanalVenda] = useState<CanalVenda>("loja");
   const [valorTerceirizado, setValorTerceirizado] = useState("");
   const [valorKit, setValorKit] = useState("");
   const [valorVendaCustom, setValorVendaCustom] = useState("");
@@ -112,14 +129,14 @@ const SimuladorPrecos = () => {
   const [editingTaxValue, setEditingTaxValue] = useState("");
 
   const exam = TABELA[modalidade];
-  const filhos = Math.max(parseInt(qtdFilhos) || 1, 1);
-  const acrescimoTotal = exam.acrescimo * Math.max(filhos - 1, 0);
-  const valorTabela = exam.valorBase + acrescimoTotal;
+  const canal = CANAIS[canalVenda];
+  const valorTabela = exam.valorBase;
   const valorVenda = valorVendaCustom ? parseFloat(valorVendaCustom.replace(",", ".")) || valorTabela : valorTabela;
   const custoTerc = valorTerceirizado ? parseFloat(valorTerceirizado.replace(",", ".")) || 0 : 0;
   const custoKit = valorKit ? parseFloat(valorKit.replace(",", ".")) || 0 : 0;
   const comissaoVal = comissao ? parseFloat(comissao.replace(",", ".")) || 0 : 0;
-  const custoTotal = custoTerc + custoKit + comissaoVal;
+  const custoLogistica = canal.logistica;
+  const custoTotal = custoTerc + custoKit + comissaoVal + custoLogistica;
 
   let taxInfo: TaxInfo;
   let totalTaxRate: number;
@@ -230,13 +247,28 @@ const SimuladorPrecos = () => {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Config */}
         <div className="lg:col-span-1 space-y-4">
+          {/* Canal de Venda */}
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">Configuração</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Qtd. Filhos Investigantes</Label>
-                <Input type="number" min="1" value={qtdFilhos} onChange={e => setQtdFilhos(e.target.value)} className="font-mono" />
-              </div>
+            <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><Store className="h-4 w-4 text-primary" /> Canal de Venda</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              {(Object.entries(CANAIS) as [CanalVenda, CanalInfo][]).map(([key, c]) => {
+                const isActive = key === canalVenda;
+                const Icon = c.icon;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setCanalVenda(key)}
+                    className={`w-full rounded-lg border p-3 text-left transition-all flex items-center gap-3 ${isActive ? `${c.color} border-2 shadow-sm` : "border-border hover:bg-muted/30"}`}
+                  >
+                    <Icon className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-semibold ${isActive ? "text-primary" : ""}`}>{c.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{c.logisticaLabel}</p>
+                    </div>
+                    {c.logistica > 0 && <span className="text-xs font-mono text-muted-foreground">{fmt(c.logistica)}</span>}
+                  </button>
+                );
+              })}
             </CardContent>
           </Card>
 
@@ -247,6 +279,7 @@ const SimuladorPrecos = () => {
               <div className="space-y-1.5"><Label className="text-xs font-semibold">Valor do Kit</Label><Input value={valorKit} onChange={e => setValorKit(e.target.value)} placeholder="0,00" className="font-mono" /></div>
               <div className="space-y-1.5"><Label className="text-xs font-semibold">Comissão</Label><Input value={comissao} onChange={e => setComissao(e.target.value)} placeholder="0,00" className="font-mono" /></div>
               <Separator />
+              <div className="flex justify-between text-xs text-muted-foreground"><span className="flex items-center gap-1"><Truck className="h-3 w-3" /> Logística ({canal.label})</span><span className="font-mono">{fmt(custoLogistica)}</span></div>
               <div className="flex justify-between text-sm font-semibold"><span>Custo Total</span><span className="font-mono text-warning">{fmt(custoTotal)}</span></div>
             </CardContent>
           </Card>
@@ -313,7 +346,7 @@ const SimuladorPrecos = () => {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2"><DollarSign className="h-5 w-5 text-success" /> Resultado</CardTitle>
-              <CardDescription>{exam.label} · {taxInfo.label}</CardDescription>
+              <CardDescription>{exam.label} · {canal.label} · {taxInfo.label}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -327,7 +360,8 @@ const SimuladorPrecos = () => {
                 <div className="space-y-2">
                   <p className="text-sm font-semibold">Composição</p>
                   <div className="flex h-8 w-full overflow-hidden rounded-full">
-                    {custoTotal > 0 && <div className="bg-warning flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${(custoTotal / valorVenda * 100).toFixed(1)}%` }}>Custo</div>}
+                    {(custoTerc + custoKit + comissaoVal) > 0 && <div className="bg-warning flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${((custoTerc + custoKit + comissaoVal) / valorVenda * 100).toFixed(1)}%` }}>Custo</div>}
+                    {custoLogistica > 0 && <div className="bg-info flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${(custoLogistica / valorVenda * 100).toFixed(1)}%` }}>Logística</div>}
                     <div className="bg-destructive flex items-center justify-center text-xs font-semibold text-white" style={{ width: `${(totalTaxValue / valorVenda * 100).toFixed(1)}%` }}>Impostos</div>
                     <div className={`flex items-center justify-center text-xs font-semibold text-white ${lucroLiquido >= 0 ? "bg-success" : "bg-destructive/60"}`} style={{ width: `${Math.max((Math.max(lucroLiquido, 0) / valorVenda) * 100, 0).toFixed(1)}%` }}>Lucro</div>
                   </div>
@@ -338,7 +372,23 @@ const SimuladorPrecos = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold">Detalhamento — {taxInfo.label}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm font-semibold">Detalhamento</p>
+                    <Select value={regime} onValueChange={v => { setRegime(v as RegimeTrib); setTaxOverrides({}); }}>
+                      <SelectTrigger className="h-8 w-auto text-xs gap-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
+                        <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
+                        <SelectItem value="gralab">
+                          <span className="flex items-center gap-1.5">
+                            <Shield className="h-3 w-3 text-chart-4" /> GRALAB 18%
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {Object.keys(taxOverrides).length > 0 && (
                     <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => { setTaxOverrides({}); toast.success("Alíquotas restauradas!"); }}>
                       <RotateCcw className="h-3 w-3" /> Restaurar
