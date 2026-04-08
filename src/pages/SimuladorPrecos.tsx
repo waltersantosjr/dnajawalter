@@ -371,7 +371,23 @@ const SimuladorPrecos = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold">Detalhamento — {taxInfo.label}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm font-semibold">Detalhamento</p>
+                    <Select value={regime} onValueChange={v => { setRegime(v as RegimeTrib); setTaxOverrides({}); }}>
+                      <SelectTrigger className="h-8 w-auto text-xs gap-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="lucro_presumido">Lucro Presumido</SelectItem>
+                        <SelectItem value="simples_nacional">Simples Nacional</SelectItem>
+                        <SelectItem value="gralab">
+                          <span className="flex items-center gap-1.5">
+                            <Shield className="h-3 w-3 text-chart-4" /> GRALAB 18%
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {Object.keys(taxOverrides).length > 0 && (
                     <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground" onClick={() => { setTaxOverrides({}); toast.success("Alíquotas restauradas!"); }}>
                       <RotateCcw className="h-3 w-3" /> Restaurar
