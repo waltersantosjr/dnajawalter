@@ -346,7 +346,7 @@ const SimuladorPrecos = () => {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2"><DollarSign className="h-5 w-5 text-success" /> Resultado</CardTitle>
-              <CardDescription>{exam.label} · {taxInfo.label}</CardDescription>
+              <CardDescription>{exam.label} · {canal.label} · {taxInfo.label}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
