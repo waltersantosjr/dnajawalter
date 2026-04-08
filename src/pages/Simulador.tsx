@@ -93,7 +93,6 @@ const Simulador = () => {
       const w = doc.internal.pageSize.getWidth();
       let y = 15;
 
-      // Header
       doc.setFillColor(30, 58, 138);
       doc.rect(0, 0, w, 30, "F");
       doc.setTextColor(255, 255, 255);
@@ -103,7 +102,6 @@ const Simulador = () => {
       doc.text(`GRALAB BIOMOL - DNAJA® | Modalidade: ${modalidade === "judicial" ? "JUDICIAL" : "PARTICULAR"} | Suposto Pai Falecido/Ausente`, w / 2, 22, { align: "center" });
       y = 38;
 
-      // Status
       const statusColor = statusInfo.level === "green" ? [22, 163, 74] : statusInfo.level === "yellow" ? [234, 179, 8] : [220, 38, 38];
       doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
       doc.roundedRect(14, y, w - 28, 18, 3, 3, "F");
@@ -114,7 +112,6 @@ const Simulador = () => {
       doc.text(statusInfo.desc, w / 2, y + 14, { align: "center" });
       y += 25;
 
-      // Filho investigante sex
       doc.setTextColor(60, 60, 60);
       doc.setFontSize(9);
       doc.text(`Sexo do Filho(a) Investigante: ${filhoSex === "M" ? "Masculino" : "Feminino"}`, 14, y);
@@ -122,7 +119,6 @@ const Simulador = () => {
       doc.text(`Parente do mesmo sexo presente: ${hasSameSexRelative ? "Sim" : "NÃO"}`, 14, y);
       y += 10;
 
-      // Investigantes section
       doc.setFillColor(22, 163, 74);
       doc.roundedRect(14, y, w - 28, 8, 2, 2, "F");
       doc.setTextColor(255, 255, 255);
@@ -138,7 +134,6 @@ const Simulador = () => {
       });
       y += 4;
 
-      // Investigados section
       doc.setFillColor(37, 99, 235);
       doc.roundedRect(14, y, w - 28, 8, 2, 2, "F");
       doc.setTextColor(255, 255, 255);
@@ -161,7 +156,6 @@ const Simulador = () => {
       }
       y += 6;
 
-      // Summary box
       doc.setDrawColor(200, 200, 200);
       doc.setFillColor(248, 248, 248);
       doc.roundedRect(14, y, w - 28, 24, 2, 2, "FD");
@@ -172,7 +166,6 @@ const Simulador = () => {
       doc.text(`Total de Participantes: ${addedInvestigantes.length + addedInvestigados.length}`, 18, y + 21);
       y += 32;
 
-      // Suggestion
       if (statusInfo.level !== "green") {
         doc.setFillColor(254, 249, 195);
         doc.roundedRect(14, y, w - 28, 16, 2, 2, "F");
@@ -182,7 +175,6 @@ const Simulador = () => {
         y += 22;
       }
 
-      // Footer
       const footerY = doc.internal.pageSize.getHeight() - 12;
       doc.setFontSize(8);
       doc.setTextColor(150, 150, 150);
@@ -207,36 +199,25 @@ const Simulador = () => {
     return <FichaDNAja examType="reconstituicao" modality={modalidade} participants={fichaParticipants} onClose={() => setShowFicha(false)} />;
   }
 
-  // Color map for tree nodes
-  const nodeColor = (m: FamilyMember) => {
-    if (m.id === "filho") return "border-success bg-success/10 text-success";
-    if (m.id === "mae") return "border-pink-400 bg-pink-50 text-pink-600";
-    if (m.side === "investigado") {
-      if (m.id === "mae_sp" || m.id === "pai_sp") return "border-amber-400 bg-amber-50 text-amber-600";
-      return "border-primary bg-primary/10 text-primary";
-    }
-    return "border-muted-foreground bg-muted text-muted-foreground";
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Activity className="h-7 w-7 text-chart-4" /> Reconstituição Genética
+        <h1 className="text-3xl font-bold flex items-center gap-3">
+          <Activity className="h-9 w-9 text-chart-4" /> Reconstituição Genética
         </h1>
-        <p className="text-muted-foreground">Suposto Pai Falecido / Ausente — Parentes em 1º Grau</p>
+        <p className="text-lg text-muted-foreground mt-1">Suposto Pai Falecido / Ausente — Parentes em 1º Grau</p>
       </div>
 
       {/* Info */}
-      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-        <div className="flex items-start gap-2">
-          <Info className="mt-0.5 h-5 w-5 text-primary shrink-0" />
+      <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5">
+        <div className="flex items-start gap-3">
+          <Info className="mt-0.5 h-6 w-6 text-primary shrink-0" />
           <div>
-            <p className="font-semibold text-primary text-sm">O que é Reconstituição Genética?</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="font-bold text-primary text-base">O que é Reconstituição Genética?</p>
+            <p className="text-sm text-muted-foreground mt-1">
               Processo de recompor o perfil genético de uma pessoa falecida/ausente a partir do DNA de seus parentes de 1º grau.
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               <strong>Regra fundamental:</strong> Ao menos um parente do <strong>mesmo sexo</strong> do filho(a) investigante.
             </p>
           </div>
@@ -244,80 +225,80 @@ const Simulador = () => {
       </div>
 
       {/* Filho sex */}
-      <Card className="border-success/20 overflow-hidden">
-        <div className="bg-gradient-to-r from-success/10 to-transparent px-5 py-3">
-          <div className="flex items-center gap-4 flex-wrap">
-            <Label className="font-semibold text-sm whitespace-nowrap">Sexo do Filho(a) Investigante:</Label>
-            <div className="flex gap-2">
-              <Button size="sm" variant={filhoSex === "M" ? "default" : "outline"} onClick={() => updateFilhoSex("M")} className={filhoSex === "M" ? "bg-primary" : ""}>👦 Masculino</Button>
-              <Button size="sm" variant={filhoSex === "F" ? "default" : "outline"} onClick={() => updateFilhoSex("F")} className={filhoSex === "F" ? "bg-[hsl(330,81%,60%)]" : ""}>👧 Feminino</Button>
+      <Card className="border-2 border-success/30 overflow-hidden">
+        <div className="bg-gradient-to-r from-success/10 to-transparent px-6 py-5">
+          <div className="flex items-center gap-5 flex-wrap">
+            <Label className="font-bold text-base whitespace-nowrap">Sexo do Filho(a) Investigante:</Label>
+            <div className="flex gap-3">
+              <Button size="lg" variant={filhoSex === "M" ? "default" : "outline"} onClick={() => updateFilhoSex("M")} className={`text-base px-6 ${filhoSex === "M" ? "bg-primary" : ""}`}>👦 Masculino</Button>
+              <Button size="lg" variant={filhoSex === "F" ? "default" : "outline"} onClick={() => updateFilhoSex("F")} className={`text-base px-6 ${filhoSex === "F" ? "bg-[hsl(330,81%,60%)]" : ""}`}>👧 Feminino</Button>
             </div>
-            <Badge variant="outline" className="text-xs">Precisa de parente {filhoSex === "M" ? "♂ masculino" : "♀ feminino"} do SP</Badge>
+            <Badge variant="outline" className="text-sm px-3 py-1">Precisa de parente {filhoSex === "M" ? "♂ masculino" : "♀ feminino"} do SP</Badge>
           </div>
         </div>
       </Card>
 
       {/* Two-column: Investigantes VS Investigados */}
       <div className="grid gap-6 lg:grid-cols-[1fr_auto_1fr]">
-        {/* INVESTIGANTES — quem busca a resposta */}
+        {/* INVESTIGANTES */}
         <Card className="border-2 border-success/40 overflow-hidden">
-          <div className="bg-success/10 px-4 py-3 border-b border-success/20">
-            <div className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-success" />
+          <div className="bg-success/10 px-5 py-4 border-b border-success/20">
+            <div className="flex items-center gap-3">
+              <Search className="h-6 w-6 text-success" />
               <div>
-                <p className="font-bold text-success text-sm">INVESTIGANTES</p>
-                <p className="text-[10px] text-muted-foreground">Quem busca a resposta — Mãe + Filho(a)</p>
+                <p className="font-bold text-success text-lg">INVESTIGANTES</p>
+                <p className="text-sm text-muted-foreground">Quem busca a resposta — Mãe + Filho(a)</p>
               </div>
             </div>
           </div>
-          <CardContent className="p-4 space-y-3">
+          <CardContent className="p-5 space-y-4">
             {/* Mãe Biológica */}
             {investigantes.filter(m => m.id === "mae").map(m => (
-              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-pink-400 bg-pink-50 text-pink-700" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
-                <span className="text-2xl">💗</span>
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-5 text-left transition-all hover:scale-[1.02] flex items-center gap-4 ${m.added ? "border-pink-400 bg-pink-50 text-pink-700" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-4xl">💗</span>
                 <div>
-                  <p className="font-semibold text-sm">Mãe Biológica</p>
-                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluída na análise" : "Clique para incluir"}</p>
+                  <p className="font-bold text-base">Mãe Biológica</p>
+                  <p className="text-sm text-muted-foreground">{m.added ? "✓ Incluída na análise" : "Clique para incluir"}</p>
                 </div>
-                <Badge variant="outline" className="ml-auto text-[10px] border-success text-success">Investigante</Badge>
+                <Badge variant="outline" className="ml-auto text-sm border-success text-success px-3 py-1">Investigante</Badge>
               </button>
             ))}
 
-            {/* Filho(a) Investigante principal */}
+            {/* Filho(a) principal */}
             {investigantes.filter(m => m.id === "filho").map(m => (
-              <div key={m.id} className="w-full rounded-xl border-2 border-success bg-success/10 p-4 flex items-center gap-3">
-                <span className="text-2xl">{filhoSex === "M" ? "👦" : "👧"}</span>
+              <div key={m.id} className="w-full rounded-xl border-2 border-success bg-success/10 p-5 flex items-center gap-4">
+                <span className="text-4xl">{filhoSex === "M" ? "👦" : "👧"}</span>
                 <div>
-                  <p className="font-semibold text-sm text-success">Filho(a) Investigante</p>
-                  <p className="text-[10px] text-muted-foreground">Participante principal — {filhoSex === "M" ? "Masculino ♂" : "Feminino ♀"}</p>
+                  <p className="font-bold text-base text-success">Filho(a) Investigante</p>
+                  <p className="text-sm text-muted-foreground">Participante principal — {filhoSex === "M" ? "Masculino ♂" : "Feminino ♀"}</p>
                 </div>
-                <Badge className="ml-auto bg-success text-white text-[10px]">Principal</Badge>
+                <Badge className="ml-auto bg-success text-white text-sm px-3 py-1">Principal</Badge>
               </div>
             ))}
 
-            {/* Filhos investigantes adicionais */}
+            {/* Filhos adicionais */}
             {investigantes.filter(m => m.custom).map(m => (
-              <div key={m.id} className="w-full rounded-xl border-2 border-success/60 bg-success/5 p-3 flex items-center gap-3">
-                <span className="text-xl">{m.sex === "M" ? "👦" : "👧"}</span>
+              <div key={m.id} className="w-full rounded-xl border-2 border-success/60 bg-success/5 p-4 flex items-center gap-4">
+                <span className="text-3xl">{m.sex === "M" ? "👦" : "👧"}</span>
                 <div>
-                  <p className="font-semibold text-xs">{m.label}</p>
-                  <p className="text-[10px] text-muted-foreground">{m.sex === "M" ? "Masculino ♂" : "Feminino ♀"}</p>
+                  <p className="font-bold text-sm">{m.label}</p>
+                  <p className="text-sm text-muted-foreground">{m.sex === "M" ? "Masculino ♂" : "Feminino ♀"}</p>
                 </div>
                 <button onClick={() => removeMember(m.id)} className="ml-auto text-destructive hover:text-destructive/80">
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
               </div>
             ))}
 
-            {/* Add more investigante children */}
-            <div className="pt-2 border-t border-dashed border-success/20">
-              <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar filho(a) investigante:</p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 flex-1" onClick={() => addInvestigante(`Filho ${investigantes.filter(m => m.custom).length + 2}`, "M")}>
-                  <Plus className="mr-1 h-3 w-3" /> Filho ♂
+            {/* Add more */}
+            <div className="pt-3 border-t border-dashed border-success/20">
+              <p className="text-sm text-muted-foreground mb-3 font-semibold">➕ Adicionar filho(a) investigante:</p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="lg" className="border-success/40 text-success hover:bg-success/10 flex-1 text-base" onClick={() => addInvestigante(`Filho ${investigantes.filter(m => m.custom).length + 2}`, "M")}>
+                  <Plus className="mr-2 h-5 w-5" /> Filho ♂
                 </Button>
-                <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 flex-1" onClick={() => addInvestigante(`Filha ${investigantes.filter(m => m.custom).length + 2}`, "F")}>
-                  <Plus className="mr-1 h-3 w-3" /> Filha ♀
+                <Button variant="outline" size="lg" className="border-success/40 text-success hover:bg-success/10 flex-1 text-base" onClick={() => addInvestigante(`Filha ${investigantes.filter(m => m.custom).length + 2}`, "F")}>
+                  <Plus className="mr-2 h-5 w-5" /> Filha ♀
                 </Button>
               </div>
             </div>
@@ -327,117 +308,114 @@ const Simulador = () => {
         {/* VS Divider */}
         <div className="hidden lg:flex flex-col items-center justify-center gap-2">
           <div className="w-0.5 flex-1 bg-border" />
-          <div className="rounded-full bg-muted border-2 border-border px-3 py-2">
-            <span className="text-xs font-bold text-muted-foreground">VS</span>
+          <div className="rounded-full bg-muted border-2 border-border px-4 py-3">
+            <span className="text-sm font-bold text-muted-foreground">VS</span>
           </div>
           <div className="w-0.5 flex-1 bg-border" />
         </div>
         <div className="lg:hidden flex items-center gap-2 py-2">
           <div className="flex-1 h-px bg-border" />
-          <span className="text-xs font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border">VS</span>
+          <span className="text-sm font-bold text-muted-foreground bg-muted px-4 py-2 rounded-full border">VS</span>
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        {/* INVESTIGADOS — parentes do suposto pai */}
+        {/* INVESTIGADOS */}
         <Card className="border-2 border-primary/40 overflow-hidden">
-          <div className="bg-primary/10 px-4 py-3 border-b border-primary/20">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
+          <div className="bg-primary/10 px-5 py-4 border-b border-primary/20">
+            <div className="flex items-center gap-3">
+              <Users className="h-6 w-6 text-primary" />
               <div>
-                <p className="font-bold text-primary text-sm">INVESTIGADOS</p>
-                <p className="text-[10px] text-muted-foreground">Parentes em 1º grau do Suposto Pai (falecido/ausente)</p>
+                <p className="font-bold text-primary text-lg">INVESTIGADOS</p>
+                <p className="text-sm text-muted-foreground">Parentes em 1º grau do Suposto Pai (falecido/ausente)</p>
               </div>
             </div>
           </div>
-          <CardContent className="p-4 space-y-3">
-            {/* Suposto Pai (falecido) */}
-            <div className="w-full rounded-xl border-2 border-dashed border-muted-foreground/40 bg-muted/30 p-4 flex items-center gap-3">
-              <span className="text-2xl">👤</span>
+          <CardContent className="p-5 space-y-4">
+            {/* Suposto Pai */}
+            <div className="w-full rounded-xl border-2 border-dashed border-muted-foreground/40 bg-muted/30 p-5 flex items-center gap-4">
+              <span className="text-4xl">👤</span>
               <div>
-                <p className="font-semibold text-sm text-muted-foreground">Suposto Pai</p>
-                <p className="text-[10px] text-muted-foreground">DNA será reconstituído pelos parentes abaixo</p>
+                <p className="font-bold text-base text-muted-foreground">Suposto Pai</p>
+                <p className="text-sm text-muted-foreground">DNA será reconstituído pelos parentes abaixo</p>
               </div>
-              <Badge variant="destructive" className="ml-auto text-[10px]">Falecido / Ausente</Badge>
+              <Badge variant="destructive" className="ml-auto text-sm px-3 py-1">Falecido / Ausente</Badge>
             </div>
 
-            <Separator className="my-1" />
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Avós Paternos</p>
+            <Separator className="my-2" />
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide">Avós Paternos</p>
 
-            {/* Avós */}
             {investigados.filter(m => m.id === "pai_sp" || m.id === "mae_sp").map(m => (
-              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-amber-400 bg-amber-50 text-amber-700" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
-                <span className="text-xl">{m.sex === "M" ? "👴" : "👵"}</span>
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.02] flex items-center gap-4 ${m.added ? "border-amber-400 bg-amber-50 text-amber-700" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-3xl">{m.sex === "M" ? "👴" : "👵"}</span>
                 <div>
-                  <p className="font-semibold text-xs">{m.role}</p>
-                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
+                  <p className="font-bold text-sm">{m.role}</p>
+                  <p className="text-sm text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
                 </div>
-                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-[10px] text-success font-bold">✓ mesmo sexo</span>}
+                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-sm text-success font-bold">✓ mesmo sexo</span>}
               </button>
             ))}
 
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mt-2">Irmãos do Suposto Pai</p>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide mt-3">Irmãos do Suposto Pai</p>
 
-            {/* Irmãos */}
             {investigados.filter(m => m.id === "irmao" || m.id === "irma").map(m => (
-              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-primary bg-primary/10 text-primary" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
-                <span className="text-xl">{m.sex === "M" ? "👨" : "👩"}</span>
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.02] flex items-center gap-4 ${m.added ? "border-primary bg-primary/10 text-primary" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-3xl">{m.sex === "M" ? "👨" : "👩"}</span>
                 <div>
-                  <p className="font-semibold text-xs">{m.role}</p>
-                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
+                  <p className="font-bold text-sm">{m.role}</p>
+                  <p className="text-sm text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
                 </div>
-                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-[10px] text-success font-bold">✓ mesmo sexo</span>}
+                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-sm text-success font-bold">✓ mesmo sexo</span>}
               </button>
             ))}
 
             {/* Custom investigados */}
             {investigados.filter(m => m.custom).map(m => (
-              <div key={m.id} className="w-full rounded-xl border-2 border-primary/60 bg-primary/5 p-3 flex items-center gap-3">
-                <span className="text-xl">{m.sex === "M" ? "👨" : "👩"}</span>
+              <div key={m.id} className="w-full rounded-xl border-2 border-primary/60 bg-primary/5 p-4 flex items-center gap-4">
+                <span className="text-3xl">{m.sex === "M" ? "👨" : "👩"}</span>
                 <div>
-                  <p className="font-semibold text-xs">{m.label}</p>
-                  <p className="text-[10px] text-muted-foreground">{m.sex === "M" ? "♂" : "♀"} — Parente do SP</p>
+                  <p className="font-bold text-sm">{m.label}</p>
+                  <p className="text-sm text-muted-foreground">{m.sex === "M" ? "♂" : "♀"} — Parente do SP</p>
                 </div>
                 <button onClick={() => removeMember(m.id)} className="ml-auto text-destructive hover:text-destructive/80">
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
               </div>
             ))}
 
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mt-2">Filhos Legítimos do SP</p>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide mt-3">Filhos Legítimos do SP</p>
 
-            {/* Filhos legítimos */}
             {investigados.filter(m => m.id === "filho_leg" || m.id === "filha_leg").map(m => (
-              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02] flex items-center gap-3 ${m.added ? "border-primary bg-primary/10 text-primary" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
-                <span className="text-xl">{m.sex === "M" ? "👦" : "👧"}</span>
+              <button key={m.id} onClick={() => toggle(m.id)} className={`w-full rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.02] flex items-center gap-4 ${m.added ? "border-primary bg-primary/10 text-primary" : "border-dashed border-muted-foreground/30 opacity-50"}`}>
+                <span className="text-3xl">{m.sex === "M" ? "👦" : "👧"}</span>
                 <div>
-                  <p className="font-semibold text-xs">{m.role}</p>
-                  <p className="text-[10px] text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
+                  <p className="font-bold text-sm">{m.role}</p>
+                  <p className="text-sm text-muted-foreground">{m.added ? "✓ Incluído" : "Clique para incluir"}</p>
                 </div>
-                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-[10px] text-success font-bold">✓ mesmo sexo</span>}
+                {m.added && m.sex === filhoSexValue && <span className="ml-auto text-sm text-success font-bold">✓ mesmo sexo</span>}
               </button>
             ))}
 
-            {/* Add more investigados */}
-            <div className="pt-2 border-t border-dashed border-primary/20 space-y-3">
+            {/* Add more */}
+            <div className="pt-3 border-t border-dashed border-primary/20 space-y-4">
               <div>
-                <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar Irmão/Irmã do Suposto Pai:</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado(`Irmão ${investigados.filter(m => m.custom && m.label.startsWith("Irmão")).length + 2}`, "M")}>
-                    <Plus className="mr-1 h-3 w-3" /> Irmão ♂
+                <p className="text-sm text-muted-foreground mb-3 font-semibold">➕ Adicionar Irmão/Irmã do Suposto Pai:</p>
+                <div className="flex gap-3">
+                  <Button variant="outline" size="lg" className="border-primary/40 text-primary hover:bg-primary/10 flex-1 text-base" onClick={() => addInvestigado(`Irmão ${investigados.filter(m => m.custom && m.label.startsWith("Irmão")).length + 2}`, "M")}>
+                    <Plus className="mr-2 h-5 w-5" /> Irmão ♂
                   </Button>
-                  <Button variant="outline" size="sm" className="border-primary/40 text-primary hover:bg-primary/10 flex-1" onClick={() => addInvestigado(`Irmã ${investigados.filter(m => m.custom && m.label.startsWith("Irmã")).length + 2}`, "F")}>
-                    <Plus className="mr-1 h-3 w-3" /> Irmã ♀
+                  <Button variant="outline" size="lg" className="border-primary/40 text-primary hover:bg-primary/10 flex-1 text-base" onClick={() => addInvestigado(`Irmã ${investigados.filter(m => m.custom && m.label.startsWith("Irmã")).length + 2}`, "F")}>
+                    <Plus className="mr-2 h-5 w-5" /> Irmã ♀
                   </Button>
                 </div>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground mb-2 font-semibold">➕ Adicionar Filho(a) Legítimo do Suposto Pai:</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="border-amber-500/40 text-amber-600 hover:bg-amber-50 flex-1" onClick={() => addInvestigado(`Filho Legítimo ${investigados.filter(m => m.custom && m.label.startsWith("Filho Legítimo")).length + 2}`, "M")}>
-                    <Plus className="mr-1 h-3 w-3" /> Filho Legítimo ♂
+                <p className="text-sm text-muted-foreground mb-3 font-semibold">➕ Adicionar Filho(a) Legítimo do Suposto Pai:</p>
+                <div className="flex gap-3">
+                  <Button variant="outline" size="lg" className="border-amber-500/40 text-amber-600 hover:bg-amber-50 flex-1 text-base" onClick={() => addInvestigado(`Filho Legítimo ${investigados.filter(m => m.custom && m.label.startsWith("Filho Legítimo")).length + 2}`, "M")}>
+                    <Plus className="mr-2 h-5 w-5" /> Filho Legítimo ♂
                   </Button>
-                  <Button variant="outline" size="sm" className="border-amber-500/40 text-amber-600 hover:bg-amber-50 flex-1" onClick={() => addInvestigado(`Filha Legítima ${investigados.filter(m => m.custom && m.label.startsWith("Filha Legítima")).length + 2}`, "F")}>
-                    <Plus className="mr-1 h-3 w-3" /> Filha Legítima ♀
+                  <Button variant="outline" size="lg" className="border-amber-500/40 text-amber-600 hover:bg-amber-50 flex-1 text-base" onClick={() => addInvestigado(`Filha Legítima ${investigados.filter(m => m.custom && m.label.startsWith("Filha Legítima")).length + 2}`, "F")}>
+                    <Plus className="mr-2 h-5 w-5" /> Filha Legítima ♀
                   </Button>
                 </div>
               </div>
@@ -446,88 +424,88 @@ const Simulador = () => {
         </Card>
       </div>
 
-      {/* Status + Selected + Action row */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {/* Traffic Light Status */}
+      {/* Status + Selected + Action */}
+      <div className="grid gap-5 md:grid-cols-3">
+        {/* Traffic Light */}
         <Card className={`border-2 ${levelBorder(statusInfo.level)} overflow-hidden`}>
-          <div className={`${levelBg(statusInfo.level)} p-5 text-center`}>
-            <span className="text-5xl">{statusInfo.level === "green" ? "🟢" : statusInfo.level === "yellow" ? "🟡" : "🔴"}</span>
-            <p className={`mt-2 font-bold ${levelColor(statusInfo.level)}`}>{statusInfo.label}</p>
+          <div className={`${levelBg(statusInfo.level)} p-6 text-center`}>
+            <span className="text-6xl">{statusInfo.level === "green" ? "🟢" : statusInfo.level === "yellow" ? "🟡" : "🔴"}</span>
+            <p className={`mt-3 font-bold text-lg ${levelColor(statusInfo.level)}`}>{statusInfo.label}</p>
           </div>
-          <CardContent className="p-4 space-y-2">
-            <p className="text-xs text-muted-foreground">{statusInfo.desc}</p>
+          <CardContent className="p-5 space-y-3">
+            <p className="text-sm text-muted-foreground">{statusInfo.desc}</p>
             {statusInfo.level !== "green" && (
-              <div className="rounded-lg border border-success/30 bg-success/5 p-2">
-                <p className="text-[10px] font-bold text-success mb-1">💡 Como tornar Verde:</p>
-                <p className="text-[10px] text-muted-foreground">{statusInfo.suggestion}</p>
+              <div className="rounded-lg border border-success/30 bg-success/5 p-3">
+                <p className="text-sm font-bold text-success mb-1">💡 Como tornar Verde:</p>
+                <p className="text-sm text-muted-foreground">{statusInfo.suggestion}</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Selected members summary */}
+        {/* Selected */}
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Participantes Selecionados</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Participantes Selecionados</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1.5">
+          <CardContent className="space-y-2">
             {addedInvestigantes.length > 0 && (
-              <p className="text-[10px] font-bold text-success uppercase tracking-wide">Investigantes</p>
+              <p className="text-sm font-bold text-success uppercase tracking-wide">Investigantes</p>
             )}
             {addedInvestigantes.map(m => (
-              <div key={m.id} className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-success" />
+              <div key={m.id} className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2">
+                  <div className="h-2.5 w-2.5 rounded-full bg-success" />
                   {m.label} ({m.sex === "M" ? "♂" : "♀"})
                 </span>
-                <Badge variant="outline" className="text-[9px] border-success text-success px-1">Investigante</Badge>
+                <Badge variant="outline" className="text-xs border-success text-success">Investigante</Badge>
               </div>
             ))}
             {addedInvestigados.length > 0 && (
-              <p className="text-[10px] font-bold text-primary uppercase tracking-wide mt-2">Investigados</p>
+              <p className="text-sm font-bold text-primary uppercase tracking-wide mt-3">Investigados</p>
             )}
             {addedInvestigados.map(m => (
-              <div key={m.id} className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1.5">
-                  <div className={`h-2 w-2 rounded-full ${m.sex === filhoSexValue ? "bg-success" : "bg-primary"}`} />
+              <div key={m.id} className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${m.sex === filhoSexValue ? "bg-success" : "bg-primary"}`} />
                   {m.label} ({m.sex === "M" ? "♂" : "♀"})
-                  {m.sex === filhoSexValue && <span className="text-[9px] text-success">✓</span>}
+                  {m.sex === filhoSexValue && <span className="text-xs text-success">✓</span>}
                 </span>
-                <Badge variant="outline" className="text-[9px] border-primary text-primary px-1">Investigado</Badge>
+                <Badge variant="outline" className="text-xs border-primary text-primary">Investigado</Badge>
               </div>
             ))}
-            {addedInvestigados.length === 0 && <p className="text-[10px] text-muted-foreground text-center py-2">Selecione parentes do SP ao lado</p>}
+            {addedInvestigados.length === 0 && <p className="text-sm text-muted-foreground text-center py-3">Selecione parentes do SP ao lado</p>}
           </CardContent>
         </Card>
 
         {/* Action */}
-        <div className="flex flex-col justify-between gap-3">
+        <div className="flex flex-col justify-between gap-4">
           <Card className="flex-1">
-            <CardContent className="p-4 space-y-3">
-              <p className="text-xs font-semibold">Resumo</p>
-              <div className="flex justify-between text-xs text-muted-foreground">
+            <CardContent className="p-5 space-y-4">
+              <p className="text-base font-bold">Resumo</p>
+              <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Investigantes:</span>
-                <span className="font-bold text-success">{addedInvestigantes.length}</span>
+                <span className="font-bold text-success text-base">{addedInvestigantes.length}</span>
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Investigados:</span>
-                <span className="font-bold text-primary">{addedInvestigados.length}</span>
+                <span className="font-bold text-primary text-base">{addedInvestigados.length}</span>
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Total participantes:</span>
-                <span className="font-bold">{addedInvestigantes.length + addedInvestigados.length}</span>
+                <span className="font-bold text-base">{addedInvestigantes.length + addedInvestigados.length}</span>
               </div>
               <Separator />
               <div>
-                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-                  <Scale className="h-3.5 w-3.5 text-primary" /> Modalidade do Exame
+                <p className="text-sm font-bold mb-3 flex items-center gap-2">
+                  <Scale className="h-5 w-5 text-primary" /> Modalidade do Exame
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setModalidade("judicial")}
-                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-all active:scale-[0.97] ${
+                    className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all active:scale-[0.97] ${
                       modalidade === "judicial"
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        ? "border-primary bg-primary text-primary-foreground shadow-md"
                         : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:bg-primary/5"
                     }`}
                   >
@@ -535,9 +513,9 @@ const Simulador = () => {
                   </button>
                   <button
                     onClick={() => setModalidade("particular")}
-                    className={`rounded-md border px-3 py-2 text-xs font-medium transition-all active:scale-[0.97] ${
+                    className={`rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all active:scale-[0.97] ${
                       modalidade === "particular"
-                        ? "border-amber-500 bg-amber-500 text-white shadow-sm"
+                        ? "border-amber-500 bg-amber-500 text-white shadow-md"
                         : "border-border bg-background text-muted-foreground hover:border-amber-400/40 hover:bg-amber-50"
                     }`}
                   >
@@ -547,22 +525,22 @@ const Simulador = () => {
               </div>
             </CardContent>
           </Card>
-          <Button className="w-full bg-success hover:bg-success/90 text-white" onClick={() => setShowFicha(true)}>
-            <ArrowRight className="mr-2 h-4 w-4" /> Abrir Ficha de Cadastro ({modalidade === "judicial" ? "Judicial" : "Particular"})
+          <Button size="lg" className="w-full bg-success hover:bg-success/90 text-white text-base" onClick={() => setShowFicha(true)}>
+            <ArrowRight className="mr-2 h-5 w-5" /> Abrir Ficha ({modalidade === "judicial" ? "Judicial" : "Particular"})
           </Button>
-          <Button variant="outline" className="w-full" onClick={exportPDF} disabled={exporting}>
-            <Download className="mr-2 h-4 w-4" /> {exporting ? "Gerando PDF..." : "Exportar PDF"}
+          <Button variant="outline" size="lg" className="w-full text-base" onClick={exportPDF} disabled={exporting}>
+            <Download className="mr-2 h-5 w-5" /> {exporting ? "Gerando PDF..." : "Exportar PDF"}
           </Button>
         </div>
       </div>
 
       {/* Same-sex warning */}
       {addedInvestigados.length > 0 && !hasSameSexRelative && (
-        <div className="flex items-start gap-3 rounded-lg border-2 border-destructive bg-destructive/5 p-4">
-          <AlertTriangle className="h-6 w-6 text-destructive shrink-0 mt-0.5" />
+        <div className="flex items-start gap-4 rounded-xl border-2 border-destructive bg-destructive/5 p-5">
+          <AlertTriangle className="h-8 w-8 text-destructive shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-destructive">⚠️ ALERTA: Nenhum parente do mesmo sexo</p>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="font-bold text-destructive text-lg">⚠️ ALERTA: Nenhum parente do mesmo sexo</p>
+            <p className="text-base text-muted-foreground mt-1">
               O investigante é <strong>{filhoSex === "M" ? "masculino" : "feminino"}</strong>. Adicione um parente <strong>{filhoSex === "M" ? "♂ masculino" : "♀ feminino"}</strong> do suposto pai.
             </p>
           </div>
@@ -572,17 +550,17 @@ const Simulador = () => {
       {/* Reference Tables */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"><Scale className="h-5 w-5 text-primary" /> Tabela de Configurações</CardTitle>
-          <CardDescription>Estimativa por cenário familiar — sem percentuais, apenas status</CardDescription>
+          <CardTitle className="text-xl flex items-center gap-3"><Scale className="h-6 w-6 text-primary" /> Tabela de Configurações</CardTitle>
+          <CardDescription className="text-sm">Estimativa por cenário familiar — sem percentuais, apenas status</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="py-2 pr-4 text-left font-semibold">Configuração</th>
-                  <th className="py-2 pr-4 text-left font-semibold">Status</th>
-                  <th className="py-2 text-left font-semibold">Observação</th>
+                  <th className="py-3 pr-4 text-left font-bold text-base">Configuração</th>
+                  <th className="py-3 pr-4 text-left font-bold text-base">Status</th>
+                  <th className="py-3 text-left font-bold text-base">Observação</th>
                 </tr>
               </thead>
               <tbody>
@@ -605,7 +583,7 @@ const Simulador = () => {
                         {row.level === "green" ? "🟢 Viável" : row.level === "yellow" ? "🟡 Cinzenta" : "🔴 Inviável"}
                       </Badge>
                     </td>
-                    <td className="py-3 text-muted-foreground text-xs">{row.obs}</td>
+                    <td className="py-3 text-muted-foreground text-sm">{row.obs}</td>
                   </tr>
                 ))}
               </tbody>
@@ -616,15 +594,15 @@ const Simulador = () => {
 
       {/* Strategic Notes */}
       <Card>
-        <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Info className="h-5 w-5 text-info" /> Orientações Estratégicas</CardTitle></CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div className="rounded-lg bg-muted/50 p-3">
-            <p className="font-semibold">Regra do Mesmo Sexo</p>
-            <p className="text-muted-foreground text-xs mt-1">Pelo menos um parente do suposto pai deve ser do mesmo sexo do filho(a) investigante para comparação dos cromossomos sexuais (X/Y).</p>
+        <CardHeader><CardTitle className="text-xl flex items-center gap-3"><Info className="h-6 w-6 text-info" /> Orientações Estratégicas</CardTitle></CardHeader>
+        <CardContent className="space-y-4 text-base">
+          <div className="rounded-xl bg-muted/50 p-4">
+            <p className="font-bold text-base">Regra do Mesmo Sexo</p>
+            <p className="text-muted-foreground text-sm mt-1">Pelo menos um parente do suposto pai deve ser do mesmo sexo do filho(a) investigante para comparação dos cromossomos sexuais (X/Y).</p>
           </div>
-          <div className="rounded-lg bg-muted/50 p-3">
-            <p className="font-semibold">Efeito Bayes & Painel NGS</p>
-            <p className="text-muted-foreground text-xs mt-1">Painéis de 47+ marcadores (NGS) elevam o LR. Quando na Zona Cinzenta, solicitar ampliação.</p>
+          <div className="rounded-xl bg-muted/50 p-4">
+            <p className="font-bold text-base">Efeito Bayes & Painel NGS</p>
+            <p className="text-muted-foreground text-sm mt-1">Painéis de 47+ marcadores (NGS) elevam o LR. Quando na Zona Cinzenta, solicitar ampliação.</p>
           </div>
         </CardContent>
       </Card>
