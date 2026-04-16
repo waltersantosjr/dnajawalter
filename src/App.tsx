@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
 import Login from "./pages/Login";
+import IDNA from "./pages/IDNA";
+import G4UApp from "./pages/G4UApp";
 import PortalCredenciado from "./pages/PortalCredenciado";
 import Dashboard from "./pages/Dashboard";
 import DNAja from "./pages/DNAja";
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/dnaja" element={<DNAja />} />
               <Route path="/exames/novo" element={<NovoExame />} />
+              <Route path="/1dna" element={<IDNA />} />
+              <Route path="/g4u" element={<G4UApp />} />
               <Route path="/exames" element={<ListaExames />} />
               <Route path="/acompanhamento" element={<AcompanhamentoExames />} />
               <Route path="/simulador" element={<Simulador />} />
