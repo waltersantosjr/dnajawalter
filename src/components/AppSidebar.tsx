@@ -69,7 +69,7 @@ export function AppSidebar() {
     <Sidebar className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <img alt="GN4U" className="h-14 w-14 rounded-lg object-contain" src="/logo-gn4u.svg" />
+          <img alt="GN4U" className="h-14 w-14 rounded-lg object-contain" src="/logo-gn4u.png" />
           <div>
             <h2 className="text-base font-bold text-sidebar-foreground">GN4U</h2>
             <p className="text-xs text-sidebar-foreground/60">Genética & Saúde</p>
