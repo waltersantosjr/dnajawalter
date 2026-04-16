@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 const NAV_ITEMS = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, roles: ["admin", "coletor", "triagem"] },
   { title: "DNAjá", url: "/dnaja", icon: Dna, roles: ["admin", "triagem"] },
+  { title: "1DNA", url: "/1dna", icon: FileSearch, roles: ["admin", "coletor", "triagem"] },
+  { title: "G4U App", url: "/g4u", icon: Heart, roles: ["admin", "coletor", "triagem"] },
   { title: "Duo ou Trio", url: "/exames/novo", icon: Users, roles: ["admin", "coletor"] },
   { title: "Reconstituição", url: "/simulador", icon: Activity, roles: ["admin", "coletor"] },
   { title: "Exames Cadastrados", url: "/exames", icon: FileText, roles: ["admin", "coletor", "triagem"] },
