@@ -2,7 +2,7 @@ import {
   Dna, LayoutDashboard, Barcode, FilePlus, FileText,
   Activity, TrendingUp, ClipboardList, Settings, LogOut, UserCog,
   Calculator, Receipt, Briefcase, Microscope, Route, Users, GraduationCap,
-  Building2, ShieldCheck, Package } from
+  Building2, ShieldCheck, Package, Heart, FileSearch } from
 "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
