@@ -39,6 +39,8 @@ const NAV_ITEMS = [
 const ICON_COLORS: Record<string, string> = {
   Dashboard: "text-primary",
   DNAjá: "text-warning",
+  "1DNA": "text-primary",
+  "G4U App": "text-destructive",
   "Duo ou Trio": "text-success",
   "Reconstituição": "text-chart-4",
   "Exames Cadastrados": "text-info",
@@ -67,10 +69,10 @@ export function AppSidebar() {
     <Sidebar className="border-r-0">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <img alt="DNAjá" className="h-10 w-auto rounded-lg object-contain" src="/lovable-uploads/6ef15ca4-bd7f-4ccc-8cc6-7c55824b7cc1.png" />
+          <img alt="GN4U" className="h-14 w-14 rounded-lg object-contain" src="/logo-gn4u.svg" />
           <div>
-            <h2 className="text-sm font-bold text-sidebar-foreground">DNAjá</h2>
-            <p className="text-xs text-sidebar-foreground/60">Vínculo Genético</p>
+            <h2 className="text-base font-bold text-sidebar-foreground">GN4U</h2>
+            <p className="text-xs text-sidebar-foreground/60">Genética & Saúde</p>
           </div>
         </div>
       </SidebarHeader>
