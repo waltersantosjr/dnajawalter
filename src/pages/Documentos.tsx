@@ -3,18 +3,41 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
-  FileText, Receipt, Scale, Building2, Shield, Printer,
-  Download, CheckCircle2, AlertTriangle, User, Briefcase,
+  FileText, Receipt, Building2, Shield, Printer,
+  Download, FileType, Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  downloadTCU, downloadTRV, downloadInconclusivo,
+  downloadCadeiaCustodia, downloadDesistencia,
+} from "@/lib/docxGenerator";
 
 const Documentos = () => {
   const [activeTab, setActiveTab] = useState("declaracoes");
+
+  // TCU
+  const [tcu, setTcu] = useState({ nome: "", documento: "", tipoExame: "" });
+  // TRV
+  const [trv, setTrv] = useState({ parente: "", documento: "", parentesco: "", supostoPai: "", certidao: "" });
+  // Inconclusivo
+  const [inc, setInc] = useState({ numCaso: "", probabilidade: "" });
+  // Cadeia de Custódia
+  const [cad, setCad] = useState({ numCaso: "", perito: "", registro: "", dataColeta: "" });
+  // Desistência
+  const [des, setDes] = useState({ ausente: "", numCaso: "", dataAgendada: "", motivo: "" });
+
+  const handleDownload = async (fn: () => Promise<void>, name: string) => {
+    try {
+      await fn();
+      toast.success(`${name} baixado em Word!`);
+    } catch {
+      toast.error("Erro ao gerar documento");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -42,16 +65,19 @@ const Documentos = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1"><Label className="text-xs">Nome do Participante</Label><Input placeholder="Nome completo" /></div>
-                <div className="space-y-1"><Label className="text-xs">RG / CPF</Label><Input placeholder="Documento" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nome do Participante</Label><Input placeholder="Nome completo" value={tcu.nome} onChange={(e) => setTcu({ ...tcu, nome: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">RG / CPF</Label><Input placeholder="Documento" value={tcu.documento} onChange={(e) => setTcu({ ...tcu, documento: e.target.value })} /></div>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Tipo de Exame</Label>
-                <Select><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent><SelectItem value="duo">Duo</SelectItem><SelectItem value="trio">Trio</SelectItem><SelectItem value="reconstituicao">Reconstituição</SelectItem><SelectItem value="irmandade">Irmandade</SelectItem></SelectContent>
+                <Select value={tcu.tipoExame} onValueChange={(v) => setTcu({ ...tcu, tipoExame: v })}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent><SelectItem value="Duo">Duo</SelectItem><SelectItem value="Trio">Trio</SelectItem><SelectItem value="Reconstituição">Reconstituição</SelectItem><SelectItem value="Irmandade">Irmandade</SelectItem></SelectContent>
                 </Select>
               </div>
-              <Button onClick={() => toast.success("TCU gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar TCU</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => toast.success("TCU gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar TCU</Button>
+                <Button variant="outline" onClick={() => handleDownload(() => downloadTCU(tcu), "TCU")}><FileType className="mr-1 h-4 w-4" /> Baixar Word</Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -62,13 +88,16 @@ const Documentos = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1"><Label className="text-xs">Parente Colaborador</Label><Input placeholder="Nome completo" /></div>
-                <div className="space-y-1"><Label className="text-xs">RG / CPF</Label><Input placeholder="Documento" /></div>
-                <div className="space-y-1"><Label className="text-xs">Grau de Parentesco</Label><Input placeholder="Ex: Irmão germano" /></div>
-                <div className="space-y-1"><Label className="text-xs">Nome do Suposto Pai Falecido</Label><Input placeholder="Nome completo" /></div>
+                <div className="space-y-1"><Label className="text-xs">Parente Colaborador</Label><Input placeholder="Nome completo" value={trv.parente} onChange={(e) => setTrv({ ...trv, parente: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">RG / CPF</Label><Input placeholder="Documento" value={trv.documento} onChange={(e) => setTrv({ ...trv, documento: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Grau de Parentesco</Label><Input placeholder="Ex: Irmão germano" value={trv.parentesco} onChange={(e) => setTrv({ ...trv, parentesco: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Nome do Suposto Pai Falecido</Label><Input placeholder="Nome completo" value={trv.supostoPai} onChange={(e) => setTrv({ ...trv, supostoPai: e.target.value })} /></div>
               </div>
-              <div className="space-y-1"><Label className="text-xs">Nº Certidão de Óbito</Label><Input placeholder="Número da certidão" /></div>
-              <Button onClick={() => toast.success("TRV gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar TRV</Button>
+              <div className="space-y-1"><Label className="text-xs">Nº Certidão de Óbito</Label><Input placeholder="Número da certidão" value={trv.certidao} onChange={(e) => setTrv({ ...trv, certidao: e.target.value })} /></div>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => toast.success("TRV gerado!")}><Printer className="mr-1 h-4 w-4" /> Gerar TRV</Button>
+                <Button variant="outline" onClick={() => handleDownload(() => downloadTRV(trv), "TRV")}><FileType className="mr-1 h-4 w-4" /> Baixar Word</Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -79,11 +108,14 @@ const Documentos = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1"><Label className="text-xs">Nº do Caso</Label><Input placeholder="EX-2026-XXXX" /></div>
-                <div className="space-y-1"><Label className="text-xs">Probabilidade Obtida (%)</Label><Input placeholder="Ex: 87,5" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº do Caso</Label><Input placeholder="EX-2026-XXXX" value={inc.numCaso} onChange={(e) => setInc({ ...inc, numCaso: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Probabilidade Obtida (%)</Label><Input placeholder="Ex: 87,5" value={inc.probabilidade} onChange={(e) => setInc({ ...inc, probabilidade: e.target.value })} /></div>
               </div>
               <p className="text-xs text-muted-foreground bg-muted p-3 rounded-md">"Declaro estar ciente de que o resultado situa-se na zona cinzenta (80-95%), não sendo suficiente para presunção de paternidade."</p>
-              <Button onClick={() => toast.success("Declaração gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => toast.success("Declaração gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+                <Button variant="outline" onClick={() => handleDownload(() => downloadInconclusivo(inc), "Declaração")}><FileType className="mr-1 h-4 w-4" /> Baixar Word</Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -94,12 +126,15 @@ const Documentos = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1"><Label className="text-xs">Nº do Caso</Label><Input placeholder="EX-2026-XXXX" /></div>
-                <div className="space-y-1"><Label className="text-xs">Perito Responsável</Label><Input placeholder="Nome do perito" /></div>
-                <div className="space-y-1"><Label className="text-xs">CRBio / CRF</Label><Input placeholder="Registro profissional" /></div>
-                <div className="space-y-1"><Label className="text-xs">Data da Coleta</Label><Input type="date" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº do Caso</Label><Input placeholder="EX-2026-XXXX" value={cad.numCaso} onChange={(e) => setCad({ ...cad, numCaso: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Perito Responsável</Label><Input placeholder="Nome do perito" value={cad.perito} onChange={(e) => setCad({ ...cad, perito: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">CRBio / CRF</Label><Input placeholder="Registro profissional" value={cad.registro} onChange={(e) => setCad({ ...cad, registro: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Data da Coleta</Label><Input type="date" value={cad.dataColeta} onChange={(e) => setCad({ ...cad, dataColeta: e.target.value })} /></div>
               </div>
-              <Button onClick={() => toast.success("Declaração de Cadeia de Custódia gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => toast.success("Declaração de Cadeia de Custódia gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+                <Button variant="outline" onClick={() => handleDownload(() => downloadCadeiaCustodia(cad), "Cadeia de Custódia")}><FileType className="mr-1 h-4 w-4" /> Baixar Word</Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -110,12 +145,15 @@ const Documentos = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1"><Label className="text-xs">Nome do Ausente</Label><Input placeholder="Nome completo" /></div>
-                <div className="space-y-1"><Label className="text-xs">Nº do Caso / Processo</Label><Input placeholder="EX-2026-XXXX" /></div>
-                <div className="space-y-1"><Label className="text-xs">Data Agendada</Label><Input type="date" /></div>
-                <div className="space-y-1"><Label className="text-xs">Motivo</Label><Input placeholder="Não compareceu / Desistência" /></div>
+                <div className="space-y-1"><Label className="text-xs">Nome do Ausente</Label><Input placeholder="Nome completo" value={des.ausente} onChange={(e) => setDes({ ...des, ausente: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Nº do Caso / Processo</Label><Input placeholder="EX-2026-XXXX" value={des.numCaso} onChange={(e) => setDes({ ...des, numCaso: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Data Agendada</Label><Input type="date" value={des.dataAgendada} onChange={(e) => setDes({ ...des, dataAgendada: e.target.value })} /></div>
+                <div className="space-y-1"><Label className="text-xs">Motivo</Label><Input placeholder="Não compareceu / Desistência" value={des.motivo} onChange={(e) => setDes({ ...des, motivo: e.target.value })} /></div>
               </div>
-              <Button onClick={() => toast.success("Declaração gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={() => toast.success("Declaração gerada!")}><Printer className="mr-1 h-4 w-4" /> Gerar Declaração</Button>
+                <Button variant="outline" onClick={() => handleDownload(() => downloadDesistencia(des), "Desistência")}><FileType className="mr-1 h-4 w-4" /> Baixar Word</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
