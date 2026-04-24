@@ -438,10 +438,50 @@ const Simulador = () => {
           </div>
           <CardContent className="p-5 space-y-3">
             <p className="text-sm text-muted-foreground">{statusInfo.desc}</p>
-            {statusInfo.level !== "green" && (
-              <div className="rounded-lg border border-success/30 bg-success/5 p-3">
-                <p className="text-sm font-bold text-success mb-1">💡 Como tornar Verde:</p>
+            {statusInfo.level === "yellow" && (
+              <div className="rounded-lg border border-warning/30 bg-warning/5 p-3 space-y-2">
+                <p className="text-sm font-bold text-warning">💡 Sugestão para tornar Viável:</p>
                 <p className="text-sm text-muted-foreground">{statusInfo.suggestion}</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-warning/50 text-warning hover:bg-warning/10"
+                  onClick={() => {
+                    document.querySelector('[data-investigados-section]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    toast.info("Adicione mais um parente do Suposto Pai");
+                  }}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" /> Adicionar Participante
+                </Button>
+              </div>
+            )}
+            {statusInfo.level === "red" && (
+              <div className="space-y-3">
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-sm font-bold text-destructive mb-1">⚠️ Próximos passos:</p>
+                  <p className="text-sm text-muted-foreground">{statusInfo.suggestion}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-success/50 text-success hover:bg-success/10"
+                  onClick={() => {
+                    document.querySelector('[data-investigados-section]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    toast.info("Tente adicionar mais parentes do Suposto Pai");
+                  }}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" /> Tentar Adicionar Participante
+                </Button>
+                <Button
+                  size="sm"
+                  className="w-full bg-destructive hover:bg-destructive/90 text-white"
+                  onClick={() => navigate("/ipm")}
+                >
+                  <ArrowRight className="mr-2 h-4 w-4" /> Encaminhar para Post Mortem (IPM)
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Quando não há parentes de 1º grau viáveis, o caso deve seguir o fluxo de Investigação Post Mortem.
+                </p>
               </div>
             )}
           </CardContent>
