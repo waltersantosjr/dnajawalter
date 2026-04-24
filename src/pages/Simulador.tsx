@@ -59,6 +59,7 @@ const levelBorder = (l: string) => l === "green" ? "border-success" : l === "yel
 const levelBgSolid = (l: string) => l === "green" ? "bg-success" : l === "yellow" ? "bg-warning" : "bg-destructive";
 
 const Simulador = () => {
+  const navigate = useNavigate();
   const [members, setMembers] = useState(INITIAL_MEMBERS);
   const [exporting, setExporting] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
