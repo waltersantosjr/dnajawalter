@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import {
   Activity, UserPlus, UserMinus, Users, Baby, Heart,
   AlertTriangle, CheckCircle2, XCircle, Shield, Scale,
   FileText, Search, Crown, Info, ArrowRight, DollarSign,
-  User, Plus, Trash2, Download,
+  User, Plus, Trash2, Download, Skull,
 } from "lucide-react";
 import { toast } from "sonner";
 import { FichaDNAja } from "@/components/FichaDNAja";
@@ -41,13 +42,15 @@ const INITIAL_MEMBERS: FamilyMember[] = [
 type StatusLevel = "green" | "yellow" | "red";
 
 const getStatusInfo = (v: number, hasSameSex: boolean, investigadosCount: number): { level: StatusLevel; label: string; desc: string; suggestion: string } => {
-  if (!hasSameSex && investigadosCount > 0) {
-    return { level: "red", label: "🔴 Configuração Inviável", desc: "Sem parente do mesmo sexo do investigante.", suggestion: "Adicione um parente do mesmo sexo (irmão/irmã, filho/filha legítimo) do suposto pai para comparação cromossômica." };
+  if (investigadosCount === 0) {
+    return { level: "red", label: "🔴 Inviável", desc: "Nenhum parente do Suposto Pai foi adicionado.", suggestion: "Adicione parentes de 1º grau do SP (avós, irmãos ou filhos legítimos). Sem nenhum parente, considere Investigação Post Mortem (IPM)." };
   }
-  if (v <= 40) return { level: "red", label: "🔴 Configuração Fraca", desc: "Alto risco de resultado inconclusivo.", suggestion: "Adicione mais parentes de 1º grau. Ideal: ambos os avós paternos (Mãe + Pai do SP) para atingir Padrão Ouro." };
-  if (v <= 60) return { level: "yellow", label: "🟡 Zona Cinzenta", desc: "Pode gerar resultado inconclusivo (80-95%).", suggestion: "Inclua a mãe biológica e mais 1 parente do mesmo sexo do investigante para fortalecer a configuração." };
-  if (v <= 80) return { level: "yellow", label: "🟡 Viável com Ressalvas", desc: "Boa configuração, mas pode ser fortalecida.", suggestion: "Adicione mais 1 parente (irmão, avô ou avó) para elevar a robustez estatística e garantir resultado conclusivo." };
-  return { level: "green", label: "🟢 Alta Viabilidade", desc: "Configuração robusta — alta probabilidade de resultado conclusivo.", suggestion: "Configuração ideal! Prossiga com a coleta." };
+  if (!hasSameSex) {
+    return { level: "red", label: "🔴 Inviável", desc: "Sem parente do mesmo sexo do investigante.", suggestion: "Adicione um parente do mesmo sexo (irmão/irmã, filho/filha legítimo) do suposto pai para comparação cromossômica." };
+  }
+  if (v <= 40) return { level: "red", label: "🔴 Inviável", desc: "Configuração insuficiente — risco de resultado inconclusivo.", suggestion: "Adicione mais parentes de 1º grau (idealmente ambos os avós paternos). Caso não existam parentes vivos, prossiga com Investigação Post Mortem (IPM)." };
+  if (v <= 70) return { level: "yellow", label: "🟡 Viável Parcialmente", desc: "Configuração aceitável, mas pode ser fortalecida.", suggestion: "Adicione mais 1 parente (irmão, avô ou avó) para elevar a robustez estatística." };
+  return { level: "green", label: "🟢 Viável", desc: "Configuração robusta — alta probabilidade de resultado conclusivo.", suggestion: "Configuração ideal! Prossiga com a coleta." };
 };
 
 const levelColor = (l: string) => l === "green" ? "text-success" : l === "yellow" ? "text-warning" : "text-destructive";
@@ -56,6 +59,7 @@ const levelBorder = (l: string) => l === "green" ? "border-success" : l === "yel
 const levelBgSolid = (l: string) => l === "green" ? "bg-success" : l === "yellow" ? "bg-warning" : "bg-destructive";
 
 const Simulador = () => {
+  const navigate = useNavigate();
   const [members, setMembers] = useState(INITIAL_MEMBERS);
   const [exporting, setExporting] = useState(false);
   const [showFicha, setShowFicha] = useState(false);
@@ -320,7 +324,7 @@ const Simulador = () => {
         </div>
 
         {/* INVESTIGADOS */}
-        <Card className="border-2 border-primary/40 overflow-hidden">
+        <Card data-investigados-section className="border-2 border-primary/40 overflow-hidden">
           <div className="bg-primary/10 px-5 py-4 border-b border-primary/20">
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary" />
@@ -434,10 +438,50 @@ const Simulador = () => {
           </div>
           <CardContent className="p-5 space-y-3">
             <p className="text-sm text-muted-foreground">{statusInfo.desc}</p>
-            {statusInfo.level !== "green" && (
-              <div className="rounded-lg border border-success/30 bg-success/5 p-3">
-                <p className="text-sm font-bold text-success mb-1">💡 Como tornar Verde:</p>
+            {statusInfo.level === "yellow" && (
+              <div className="rounded-lg border border-warning/30 bg-warning/5 p-3 space-y-2">
+                <p className="text-sm font-bold text-warning">💡 Sugestão para tornar Viável:</p>
                 <p className="text-sm text-muted-foreground">{statusInfo.suggestion}</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-warning/50 text-warning hover:bg-warning/10"
+                  onClick={() => {
+                    document.querySelector('[data-investigados-section]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    toast.info("Adicione mais um parente do Suposto Pai");
+                  }}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" /> Adicionar Participante
+                </Button>
+              </div>
+            )}
+            {statusInfo.level === "red" && (
+              <div className="space-y-3">
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-sm font-bold text-destructive mb-1">⚠️ Próximos passos:</p>
+                  <p className="text-sm text-muted-foreground">{statusInfo.suggestion}</p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full border-success/50 text-success hover:bg-success/10"
+                  onClick={() => {
+                    document.querySelector('[data-investigados-section]')?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    toast.info("Tente adicionar mais parentes do Suposto Pai");
+                  }}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" /> Tentar Adicionar Participante
+                </Button>
+                <Button
+                  size="sm"
+                  className="w-full bg-destructive hover:bg-destructive/90 text-white"
+                  onClick={() => navigate("/ipm")}
+                >
+                  <ArrowRight className="mr-2 h-4 w-4" /> Encaminhar para Post Mortem (IPM)
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Quando não há parentes de 1º grau viáveis, o caso deve seguir o fluxo de Investigação Post Mortem.
+                </p>
               </div>
             )}
           </CardContent>
