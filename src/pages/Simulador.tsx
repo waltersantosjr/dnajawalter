@@ -324,7 +324,7 @@ const Simulador = () => {
         </div>
 
         {/* INVESTIGADOS */}
-        <Card className="border-2 border-primary/40 overflow-hidden">
+        <Card data-investigados-section className="border-2 border-primary/40 overflow-hidden">
           <div className="bg-primary/10 px-5 py-4 border-b border-primary/20">
             <div className="flex items-center gap-3">
               <Users className="h-6 w-6 text-primary" />
