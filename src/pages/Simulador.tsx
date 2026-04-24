@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import {
   Activity, UserPlus, UserMinus, Users, Baby, Heart,
   AlertTriangle, CheckCircle2, XCircle, Shield, Scale,
   FileText, Search, Crown, Info, ArrowRight, DollarSign,
-  User, Plus, Trash2, Download,
+  User, Plus, Trash2, Download, Skull,
 } from "lucide-react";
 import { toast } from "sonner";
 import { FichaDNAja } from "@/components/FichaDNAja";
