@@ -42,13 +42,15 @@ const INITIAL_MEMBERS: FamilyMember[] = [
 type StatusLevel = "green" | "yellow" | "red";
 
 const getStatusInfo = (v: number, hasSameSex: boolean, investigadosCount: number): { level: StatusLevel; label: string; desc: string; suggestion: string } => {
-  if (!hasSameSex && investigadosCount > 0) {
-    return { level: "red", label: "🔴 Configuração Inviável", desc: "Sem parente do mesmo sexo do investigante.", suggestion: "Adicione um parente do mesmo sexo (irmão/irmã, filho/filha legítimo) do suposto pai para comparação cromossômica." };
+  if (investigadosCount === 0) {
+    return { level: "red", label: "🔴 Inviável", desc: "Nenhum parente do Suposto Pai foi adicionado.", suggestion: "Adicione parentes de 1º grau do SP (avós, irmãos ou filhos legítimos). Sem nenhum parente, considere Investigação Post Mortem (IPM)." };
   }
-  if (v <= 40) return { level: "red", label: "🔴 Configuração Fraca", desc: "Alto risco de resultado inconclusivo.", suggestion: "Adicione mais parentes de 1º grau. Ideal: ambos os avós paternos (Mãe + Pai do SP) para atingir Padrão Ouro." };
-  if (v <= 60) return { level: "yellow", label: "🟡 Zona Cinzenta", desc: "Pode gerar resultado inconclusivo (80-95%).", suggestion: "Inclua a mãe biológica e mais 1 parente do mesmo sexo do investigante para fortalecer a configuração." };
-  if (v <= 80) return { level: "yellow", label: "🟡 Viável com Ressalvas", desc: "Boa configuração, mas pode ser fortalecida.", suggestion: "Adicione mais 1 parente (irmão, avô ou avó) para elevar a robustez estatística e garantir resultado conclusivo." };
-  return { level: "green", label: "🟢 Alta Viabilidade", desc: "Configuração robusta — alta probabilidade de resultado conclusivo.", suggestion: "Configuração ideal! Prossiga com a coleta." };
+  if (!hasSameSex) {
+    return { level: "red", label: "🔴 Inviável", desc: "Sem parente do mesmo sexo do investigante.", suggestion: "Adicione um parente do mesmo sexo (irmão/irmã, filho/filha legítimo) do suposto pai para comparação cromossômica." };
+  }
+  if (v <= 40) return { level: "red", label: "🔴 Inviável", desc: "Configuração insuficiente — risco de resultado inconclusivo.", suggestion: "Adicione mais parentes de 1º grau (idealmente ambos os avós paternos). Caso não existam parentes vivos, prossiga com Investigação Post Mortem (IPM)." };
+  if (v <= 70) return { level: "yellow", label: "🟡 Viável Parcialmente", desc: "Configuração aceitável, mas pode ser fortalecida.", suggestion: "Adicione mais 1 parente (irmão, avô ou avó) para elevar a robustez estatística." };
+  return { level: "green", label: "🟢 Viável", desc: "Configuração robusta — alta probabilidade de resultado conclusivo.", suggestion: "Configuração ideal! Prossiga com a coleta." };
 };
 
 const levelColor = (l: string) => l === "green" ? "text-success" : l === "yellow" ? "text-warning" : "text-destructive";
